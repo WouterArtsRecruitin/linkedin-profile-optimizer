@@ -53,25 +53,7 @@ linkedin-optimizer-agent/
 ## Gebruik als Agent (via JotForm webhook)
 
 ```
-POST /webhook/jotform
-```
-
-Of test direct via de API:
-
-```
-POST /analyze
-Content-Type: application/json
-
-{
-  "first_name": "Victor",
-  "last_name": "Hendriks",
-  "email": "test@example.com",
-  "location": "Aalten, Gelderland",
-  "linkedin_url": "https://linkedin.com/in/victorhendriks",
-  "current_headline": "Toezichthouder bouw",
-  "current_about": "geen",
-  "current_job_title": "Toezichthouder Bouw & RO",
-  "current_employer": "Gemeente Montferland",
-  ...
-}
+POST /webhook/jotform      — JotForm submissions (Form 1 & 2)
+POST /webhook/clay-callback — Clay enrichment callback
+GET  /                      — Health check
 ```
