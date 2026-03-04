@@ -1,0 +1,59 @@
+# LinkedIn Profile Optimizer Agent - Configuratie
+# ================================================
+
+agent:
+  name: "LinkedIn Profile Optimizer Agent v2.0"
+  version: "2.0.0"
+  description: "Automated LinkedIn profile analysis, optimization and mockup generation"
+
+# JotForm configuratie
+jotform:
+  api_key: "${JOTFORM_API_KEY}"
+  api_base: "https://eu-api.jotform.com"
+  form_id: "${JOTFORM_FORM_ID}"
+  webhook_secret: "${JOTFORM_WEBHOOK_SECRET}"
+
+# Webhook server
+server:
+  host: "0.0.0.0"
+  port: 8080
+  debug: false
+
+# Output instellingen
+output:
+  directory: "./output"
+  formats:
+    - html
+    - pdf
+    - png
+
+# Banner instellingen
+banner:
+  width: 1584
+  height: 396
+  default_style: "modern_professional"
+
+# Profiel scoring gewichten (totaal = 100%)
+scoring:
+  headline: 15
+  about: 15
+  experience: 15
+  skills: 10
+  photo: 5
+  banner: 5
+  seo_keywords: 15
+  education: 5
+  unique_value: 10
+  audience_fit: 5
+
+# StoryBrand SB7 Framework config
+storybrand:
+  framework: "SB7"
+  sections:
+    - "problem_external"
+    - "problem_internal"
+    - "guide_empathy"
+    - "guide_authority"
+    - "plan"
+    - "call_to_action"
+    - "success_result"

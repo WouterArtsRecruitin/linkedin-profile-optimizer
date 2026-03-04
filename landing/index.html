@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gratis LinkedIn Profiel Analyse | Recruitin</title>
+    <meta name="description"
+        content="Ontvang een gratis LinkedIn profiel analyse met score, verbeterde teksten en professionele banner. Binnen 24 uur in je inbox.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;900&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css?v=6">
+
+    <!-- ========== TRACKING PIXELS ========== -->
+
+    <!-- Google Analytics 4 (GA4) -->
+    <!-- TODO: Vervang G-W6G1NY28BD door je eigen GA4 Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W6G1NY28BD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-W6G1NY28BD');
+    </script>
+
+    <!-- Facebook Pixel -->
+    <!-- TODO: Vervang 238226887541404 door je Facebook Pixel ID -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '238226887541404');
+        fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=238226887541404&ev=PageView&noscript=1" /></noscript>
+
+    <!-- LinkedIn Insight Tag -->
+    <!-- TODO: Vervang 1830706 door je LinkedIn Partner ID -->
+    <script type="text/javascript">
+        _linkedin_partner_id = "1830706";
+        window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+        window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+    </script>
+    <script type="text/javascript">
+        (function (l) {
+            if (!l) {
+                window.lintrk = function (a, b) { window.lintrk.q.push([a, b]) };
+                window.lintrk.q = []
+            }
+            var s = document.getElementsByTagName("script")[0];
+            var b = document.createElement("script");
+            b.type = "text/javascript"; b.async = true;
+            b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+            s.parentNode.insertBefore(b, s);
+        })(window.lintrk);
+    </script>
+    <noscript><img height="1" width="1" style="display:none" alt=""
+            src="https://px.ads.linkedin.com/collect/?pid=1830706&fmt=gif" /></noscript>
+
+</head>
+
+<body>
+
+    <!-- Nav -->
+    <nav class="nav">
+        <div class="container nav-inner">
+            <img src="https://recruitin.nl/wp-content/uploads/2024/12/Recruitin-Logo-liggend.svg" alt="Recruitin"
+                class="nav-logo" />
+            <a href="#" class="nav-cta" onclick="scrollToForm()">Gratis Analyse →</a>
+        </div>
+    </nav>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-inner">
+            <div class="hero-content">
+                <div class="urgency-badge">
+                    <span class="pulse"></span>
+                    Nog <strong>12 plekken</strong> deze week
+                </div>
+                <h1>Verbeter je LinkedIn profiel.<br><span class="highlight">Genereer meer leads.</span></h1>
+                <p class="hero-sub">Ontvang binnen 24 uur een persoonlijk rapport met je score, verbeterde teksten en
+                    een op-maat gemaakte banner. <strong>100% gratis.</strong></p>
+
+                <!-- Inline form -->
+                <form class="hero-form" id="quickForm" onsubmit="submitForm(event)">
+                    <div class="form-row">
+                        <input type="url" id="linkedin_url" name="linkedin_url"
+                            placeholder="https://linkedin.com/in/jouw-profiel" required />
+                        <input type="email" id="email" name="email" placeholder="naam@bedrijf.nl" required />
+                        <button type="submit" class="btn-primary" id="submitBtn">
+                            Ontvang mijn rapport →
+                        </button>
+                    </div>
+                    <p class="form-disclaimer">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.
+                        Gegevens worden na 30 dagen verwijderd.</p>
+                </form>
+
+                <div class="hero-stats">
+                    <div class="stat">
+                        <strong>127</strong>
+                        <span>profielen geanalyseerd</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <strong>
+                            < 24u</strong>
+                                <span>levertijd rapport</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <strong>+68%</strong>
+                        <span>meer profielweergaven</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score mockup -->
+            <div class="hero-visual">
+                <div class="score-card">
+                    <div class="score-header">LinkedIn Profiel Score</div>
+                    <div class="score-ring-wrap">
+                        <svg viewBox="0 0 140 140" class="score-svg">
+                            <circle cx="70" cy="70" r="58" stroke="rgba(255,255,255,0.1)" stroke-width="10"
+                                fill="none" />
+                            <circle cx="70" cy="70" r="58" stroke="#ef7d00" stroke-width="10" fill="none"
+                                stroke-dasharray="364" stroke-dashoffset="110" stroke-linecap="round"
+                                transform="rotate(-90 70 70)" class="score-progress" />
+                        </svg>
+                        <div class="score-value">
+                            <span class="score-num" id="scoreNum">?</span>
+                            <span class="score-label">/ 100</span>
+                        </div>
+                    </div>
+                    <div class="score-bars">
+                        <div class="bar-row"><span>Headline</span>
+                            <div class="bar">
+                                <div class="bar-fill" style="width:45%"></div>
+                            </div>
+                        </div>
+                        <div class="bar-row"><span>About</span>
+                            <div class="bar">
+                                <div class="bar-fill" style="width:30%"></div>
+                            </div>
+                        </div>
+                        <div class="bar-row"><span>SEO Keywords</span>
+                            <div class="bar">
+                                <div class="bar-fill" style="width:60%"></div>
+                            </div>
+                        </div>
+                        <div class="bar-row"><span>Banner</span>
+                            <div class="bar">
+                                <div class="bar-fill w0" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="score-cta">Jouw score ontdekken? ↑</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 3 STAPPEN (direct onder hero) ========== -->
+    <section class="steps-strip">
+        <div class="container">
+            <div class="steps-inline">
+                <div class="step-inline">
+                    <div class="step-num">1</div>
+                    <div>
+                        <strong>URL invullen</strong>
+                        <span>10 seconden, meer niet</span>
+                    </div>
+                </div>
+                <div class="step-chevron">›</div>
+                <div class="step-inline">
+                    <div class="step-num">2</div>
+                    <div>
+                        <strong>AI analyseert</strong>
+                        <span>10 criteria, 1 rapport</span>
+                    </div>
+                </div>
+                <div class="step-chevron">›</div>
+                <div class="step-inline">
+                    <div class="step-num">3</div>
+                    <div>
+                        <strong>Inbox checken</strong>
+                        <span>Score + teksten + banner</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== WAT JE KRIJGT ========== -->
+    <section class="benefits">
+        <div class="container">
+            <h2>Dit zit in je <span class="highlight">gratis rapport</span></h2>
+            <div class="benefits-grid">
+                <div class="benefit">
+                    <div class="benefit-icon">📊</div>
+                    <h3>Profiel Score (0-100)</h3>
+                    <p>Exacte score op 10 criteria. Je weet precies waar je staat én waar je kunt verbeteren.</p>
+                </div>
+                <div class="benefit">
+                    <div class="benefit-icon">✍️</div>
+                    <h3>Herschreven Headline & About</h3>
+                    <p>Kant-en-klare teksten geschreven met het StoryBrand framework. Kopiëren en plakken.</p>
+                </div>
+                <div class="benefit">
+                    <div class="benefit-icon">🎨</div>
+                    <h3>Professionele Banner</h3>
+                    <p>Op maat ontworpen voor jouw sector. Direct te uploaden naar je profiel.</p>
+                </div>
+                <div class="benefit">
+                    <div class="benefit-icon">🔍</div>
+                    <h3>SEO Keywords Analyse</h3>
+                    <p>De juiste keywords zodat recruiters en klanten jou vinden via LinkedIn search.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== RAPPORT PREVIEW ========== -->
+    <section class="preview-section">
+        <div class="container preview-inner">
+            <div class="preview-text">
+                <h2>Zo ziet jouw rapport eruit</h2>
+                <p>Een compleet overzicht met score, verbeterpunten, herschreven teksten en je nieuwe banner. Alles wat
+                    je nodig hebt in één PDF.</p>
+                <ul class="preview-list">
+                    <li>✅ Persoonlijke score per criterium</li>
+                    <li>✅ Verbeterde headline & about (copy-paste ready)</li>
+                    <li>✅ Professionele banner op maat</li>
+                    <li>✅ Top-3 quick wins voor direct resultaat</li>
+                </ul>
+                <button class="btn-secondary" onclick="scrollToForm()">Ik wil dit rapport →</button>
+            </div>
+            <div class="preview-mockup">
+                <div class="mockup-page">
+                    <div class="mockup-header">
+                        <div class="mockup-logo-placeholder"></div>
+                        <span>LinkedIn Profiel Analyse</span>
+                    </div>
+                    <div class="mockup-score-row">
+                        <div class="mockup-mini-ring"></div>
+                        <div class="mockup-bars-mini">
+                            <div class="mini-bar" style="width:80%"></div>
+                            <div class="mini-bar" style="width:55%"></div>
+                            <div class="mini-bar" style="width:90%"></div>
+                            <div class="mini-bar" style="width:40%"></div>
+                        </div>
+                    </div>
+                    <div class="mockup-text-lines">
+                        <div class="text-line w80"></div>
+                        <div class="text-line w60"></div>
+                        <div class="text-line w90"></div>
+                        <div class="text-line w70"></div>
+                    </div>
+                    <div class="mockup-banner-preview"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SOCIAL PROOF ========== -->
+    <section class="reviews">
+        <div class="container">
+            <h2>Van sceptisch naar <span class="highlight">overtuigd</span></h2>
+            <div class="reviews-grid">
+                <div class="review">
+                    <div class="review-top">
+                        <div class="review-avatar">MK</div>
+                        <div>
+                            <strong>Martijn Kuiper</strong>
+                            <span>Projectmanager · Bouw</span>
+                        </div>
+                    </div>
+                    <div class="stars">★★★★★</div>
+                    <p>"Mijn profiel scoorde een <strong>42</strong>. Na de verbeteringen: <strong>87</strong>. Binnen
+                        een week 3x meer profielweergaven."</p>
+                    <div class="result-badge">+3x profielweergaven</div>
+                </div>
+                <div class="review">
+                    <div class="review-top">
+                        <div class="review-avatar">SV</div>
+                        <div>
+                            <strong>Sandra Vermeer</strong>
+                            <span>Senior Engineer · Techniek</span>
+                        </div>
+                    </div>
+                    <div class="stars">★★★★★</div>
+                    <p>"De banner is echt professioneel. Collega's vragen waar ik die heb laten maken. De herschreven
+                        about is spot-on."</p>
+                    <div class="result-badge">Professionele uitstraling</div>
+                </div>
+                <div class="review">
+                    <div class="review-top">
+                        <div class="review-avatar">JB</div>
+                        <div>
+                            <strong>Jan de Boer</strong>
+                            <span>IT Consultant · Software</span>
+                        </div>
+                    </div>
+                    <div class="stars">★★★★★</div>
+                    <p>"Na het updaten werd ik benaderd door <strong>2 recruiters</strong> in de eerste week. De SEO
+                        tips maakten het verschil."</p>
+                    <div class="result-badge">2 recruiter-benaderings</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FAQ ========== -->
+    <section class="faq">
+        <div class="container faq-inner">
+            <h2>Veelgestelde vragen</h2>
+            <details>
+                <summary>Is dit echt 100% gratis?</summary>
+                <p>Ja. Geen kosten, geen verplichtingen, geen upsell. Wij doen dit om ons netwerk te laten zien wat
+                    Recruitin kan.</p>
+            </details>
+            <details>
+                <summary>Hoe lang duurt het?</summary>
+                <p>Invullen: 10 seconden. Rapport ontvangen: binnen 24 uur per e-mail.</p>
+            </details>
+            <details>
+                <summary>Wat doen jullie met mijn gegevens?</summary>
+                <p>Uitsluitend voor de analyse. Na 30 dagen automatisch verwijderd. Nooit gedeeld met derden. 100%
+                    AVG-conform.</p>
+            </details>
+            <details>
+                <summary>Moet ik iets installeren of een account aanmaken?</summary>
+                <p>Nee. Geen account, geen download, geen installatie. Alleen je LinkedIn URL en e-mail invullen.</p>
+            </details>
+            <details>
+                <summary>Wat als mijn profiel al goed is?</summary>
+                <p>Dan hoor je dat! Je krijgt een eerlijke score met focus op de laatste verbeterpunten voor een perfect
+                    profiel.</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- ========== FINAL CTA ========== -->
+    <section class="final-cta">
+        <div class="final-overlay"></div>
+        <div class="container final-inner">
+            <div class="urgency-badge urgency-light">
+                <span class="pulse"></span>
+                Nog <strong>12 plekken</strong> deze week
+            </div>
+            <h2>Je profiel verbeteren begint hier</h2>
+            <p>10 seconden invullen. 24 uur wachten. Jaren profiteren.</p>
+            <button class="btn-white" onclick="scrollToForm()">Ontvang mijn gratis rapport →</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <img src="https://recruitin.nl/wp-content/uploads/2024/12/Recruitin-Logo-liggend.svg" alt="Recruitin"
+                class="footer-logo" />
+            <p class="tagline">the right people, right now</p>
+            <div class="footer-links">
+                <a href="https://recruitin.nl">Website</a>
+                <a href="#">Privacybeleid</a>
+                <a href="https://linkedin.com/company/recruitin" target="_blank">LinkedIn</a>
+            </div>
+            <p class="copyright">© 2026 Recruitin — Doesburg, Nederland</p>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-box">
+            <div class="modal-icon">🎉</div>
+            <h2>Je rapport is onderweg!</h2>
+            <p>We analyseren je profiel en sturen het rapport binnen 24 uur naar <strong id="confirmEmail"></strong>.
+            </p>
+            <div class="modal-steps">
+                <div class="modal-step">✅ Aanvraag ontvangen</div>
+                <div class="modal-step pending">⏳ Profiel wordt geanalyseerd</div>
+                <div class="modal-step pending">📧 Rapport per e-mail</div>
+            </div>
+            <button class="btn-primary" onclick="closeModal()">Begrepen!</button>
+        </div>
+    </div>
+
+    <script>
+        function scrollToForm() {
+            document.getElementById('linkedin_url').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function submitForm(e) {
+            e.preventDefault();
+            const url = document.getElementById('linkedin_url').value;
+            const email = document.getElementById('email').value;
+            const btn = document.getElementById('submitBtn');
+
+            btn.textContent = 'Bezig met versturen...';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+
+            try {
+                await fetch('https://eu-api.jotform.com/form/260606272965058/submissions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'submission[46]': url,
+                        'submission[3]': email,
+                        'apiKey': '8446b2ba4c0c9cc79355873c4479d269'
+                    })
+                });
+                document.getElementById('confirmEmail').textContent = email;
+                document.getElementById('successModal').classList.add('active');
+                e.target.reset();
+
+                // ── Tracking: Conversie events ──
+                // GA4
+                if (typeof gtag === 'function') {
+                    gtag('event', 'generate_lead', {
+                        event_category: 'linkedin_optimizer',
+                        event_label: 'form_submit',
+                        value: 1
+                    });
+                }
+                // Facebook Pixel
+                if (typeof fbq === 'function') {
+                    fbq('track', 'Lead', {
+                        content_name: 'LinkedIn Profiel Analyse',
+                        content_category: 'linkedin_optimizer'
+                    });
+                }
+                // LinkedIn Insight Tag
+                if (typeof lintrk === 'function') {
+                    lintrk('track', { conversion_id: 0 }); // TODO: vul conversion_id in
+                }
+
+            } catch (err) {
+                alert('Er ging iets mis. Probeer het opnieuw.');
+            }
+            btn.textContent = 'Ontvang mijn rapport →';
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('active');
+        }
+
+        // Scroll animations
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.benefit, .review, .preview-mockup').forEach(el => obs.observe(el));
+
+        // Score animation in hero
+        const heroObs = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                const el = document.getElementById('scoreNum');
+                let n = 0;
+                const iv = setInterval(() => {
+                    n += 1;
+                    el.textContent = n;
+                    if (n >= 69) { clearInterval(iv); }
+                }, 25);
+                entries[0].target.querySelectorAll('.bar-fill').forEach((bar, i) => {
+                    setTimeout(() => bar.style.transition = 'width 1s ease', i * 200);
+                });
+            }
+        });
+        const scoreCard = document.querySelector('.score-card');
+        if (scoreCard) heroObs.observe(scoreCard);
+    </script>
+</body>
+
+</html>

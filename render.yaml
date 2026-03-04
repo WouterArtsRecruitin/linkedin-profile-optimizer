@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: linkedin-optimizer-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn webhook_handler:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: JOTFORM_API_TOKEN
+        sync: false
+      - key: JOTFORM_FORM_ID
+        sync: false
+      - key: JOTFORM_FORM2_ID
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CLAY_API_KEY
+        sync: false
+      - key: CLAY_WEBHOOK_URL
+        sync: false
+      - key: LEMLIST_API_KEY
+        sync: false
+      - key: LEMLIST_CAMPAIGN_ID
+        sync: false
+      - key: PIPEDRIVE_API_KEY
+        sync: false
+      - key: PIPEDRIVE_DOMAIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: QUALIFIED_SCORE_THRESHOLD
+        value: "50"

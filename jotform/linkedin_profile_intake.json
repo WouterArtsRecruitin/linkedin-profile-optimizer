@@ -1,0 +1,314 @@
+{
+    "form_title": "LinkedIn Profiel Optimizer — Gratis Analyse",
+    "form_description": "Vul je LinkedIn profielgegevens in en ontvang binnen 24 uur een uitgebreide analyse met verbeterde teksten, een professionele mockup en een nieuwe banner. 100% gratis, 0% verplichtingen.",
+    "branding": {
+        "logo": "recruitin_logo.png",
+        "primary_color": "#0a66c2",
+        "secondary_color": "#f97316",
+        "font": "Inter"
+    },
+    "sections": [
+        {
+            "section": "1. Over Jou",
+            "section_icon": "👤",
+            "fields": [
+                {
+                    "name": "first_name",
+                    "label": "Voornaam",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Bijv. Jan"
+                },
+                {
+                    "name": "last_name",
+                    "label": "Achternaam",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Bijv. de Vries"
+                },
+                {
+                    "name": "email",
+                    "label": "E-mailadres",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "jouw@email.nl",
+                    "description": "Hier ontvang je het analyserapport"
+                },
+                {
+                    "name": "phone",
+                    "label": "Telefoonnummer",
+                    "type": "phone",
+                    "required": false,
+                    "placeholder": "+31 6 12345678"
+                },
+                {
+                    "name": "location",
+                    "label": "Woonplaats + Provincie",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Bijv. Amsterdam, Noord-Holland"
+                }
+            ]
+        },
+        {
+            "section": "2. Je Huidige LinkedIn Profiel",
+            "section_icon": "🔗",
+            "fields": [
+                {
+                    "name": "linkedin_url",
+                    "label": "LinkedIn profiel URL",
+                    "type": "url",
+                    "required": true,
+                    "placeholder": "https://linkedin.com/in/jouw-profiel",
+                    "validation": "^https?://(www\\.)?linkedin\\.com/in/.+$"
+                },
+                {
+                    "name": "current_headline",
+                    "label": "Huidige headline / kopregel",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Kopieer je huidige LinkedIn headline hier",
+                    "description": "Dit is de tekst direct onder je naam op LinkedIn"
+                },
+                {
+                    "name": "current_about",
+                    "label": "Huidige 'Over mij' / 'About' tekst",
+                    "type": "textarea",
+                    "required": true,
+                    "max_length": 3000,
+                    "placeholder": "Plak hier je huidige LinkedIn 'Over mij' tekst. Als je er geen hebt, schrijf 'geen'."
+                },
+                {
+                    "name": "profile_photo",
+                    "label": "Profielfoto (upload of URL)",
+                    "type": "file_upload",
+                    "required": false,
+                    "accept": "image/png,image/jpeg,image/webp",
+                    "description": "Optioneel: upload je huidige profielfoto zodat we die in de mockup kunnen tonen"
+                },
+                {
+                    "name": "has_banner",
+                    "label": "Heb je al een aangepaste LinkedIn banner?",
+                    "type": "radio",
+                    "required": true,
+                    "options": [
+                        "Nee, ik heb de standaard achtergrond",
+                        "Ja, maar ik wil een betere",
+                        "Ja, en ik ben er tevreden mee"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "3. Werkervaring",
+            "section_icon": "💼",
+            "fields": [
+                {
+                    "name": "current_job_title",
+                    "label": "Huidige functietitel",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Bijv. Software Engineer of Projectmanager"
+                },
+                {
+                    "name": "current_employer",
+                    "label": "Huidige werkgever",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Bijv. Philips of Gemeente Utrecht"
+                },
+                {
+                    "name": "employment_type",
+                    "label": "Type dienstverband",
+                    "type": "dropdown",
+                    "required": true,
+                    "options": [
+                        "Fulltime",
+                        "Parttime",
+                        "ZZP / Freelance",
+                        "Interim",
+                        "Ondernemer / Eigenaar",
+                        "Student / Starter"
+                    ]
+                },
+                {
+                    "name": "years_experience",
+                    "label": "Totaal aantal jaren werkervaring",
+                    "type": "dropdown",
+                    "required": true,
+                    "options": [
+                        "0-2 jaar",
+                        "3-5 jaar",
+                        "6-10 jaar",
+                        "11-15 jaar",
+                        "16-20 jaar",
+                        "20+ jaar"
+                    ]
+                },
+                {
+                    "name": "current_job_start",
+                    "label": "Startdatum huidige functie",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Bijv. mei 2022"
+                },
+                {
+                    "name": "current_job_description",
+                    "label": "Beschrijving huidige functie (taken & verantwoordelijkheden)",
+                    "type": "textarea",
+                    "required": true,
+                    "max_length": 2000,
+                    "placeholder": "Beschrijf je belangrijkste taken, verantwoordelijkheden en behaalde resultaten in je huidige functie."
+                },
+                {
+                    "name": "previous_experience",
+                    "label": "Eerdere werkervaring (meest relevant)",
+                    "type": "textarea",
+                    "required": false,
+                    "max_length": 3000,
+                    "placeholder": "Functietitel | Bedrijf | Periode | Korte beschrijving\n\nBijv:\nTekenaar AutoCAD | Waterschap Rijn en IJssel | 2015-2022 | Technische tekeningen, documentbeheer, 1000+ documenten gedigitaliseerd"
+                }
+            ]
+        },
+        {
+            "section": "4. Doelen & Positionering",
+            "section_icon": "🎯",
+            "fields": [
+                {
+                    "name": "linkedin_goal",
+                    "label": "Wat is je belangrijkste doel met LinkedIn?",
+                    "type": "dropdown",
+                    "required": true,
+                    "options": [
+                        "Een nieuwe baan vinden",
+                        "Meer klanten / opdrachten krijgen",
+                        "Personal branding versterken",
+                        "Netwerk uitbreiden in mijn sector",
+                        "Zichtbaarheid als expert vergroten",
+                        "Gerekruteerd worden door recruiters",
+                        "Anders"
+                    ]
+                },
+                {
+                    "name": "target_sector",
+                    "label": "In welke sector/branche wil je actief zijn?",
+                    "type": "dropdown",
+                    "required": true,
+                    "options": [
+                        "Bouw & Infra",
+                        "Techniek & Industrie",
+                        "IT & Software",
+                        "Engineering & R&D",
+                        "Overheid & Publieke Sector",
+                        "Financiën & Banking",
+                        "Logistiek & Supply Chain",
+                        "Marketing & Communicatie",
+                        "HR & Recruitment",
+                        "Gezondheidszorg",
+                        "Onderwijs",
+                        "Anders"
+                    ]
+                },
+                {
+                    "name": "target_audience",
+                    "label": "Wie wil je bereiken op LinkedIn?",
+                    "type": "textarea",
+                    "required": true,
+                    "max_length": 500,
+                    "placeholder": "Bijv. Recruiters bij omgevingsdiensten, HR managers in de bouw, technisch directeuren"
+                },
+                {
+                    "name": "top_3_skills",
+                    "label": "Wat zijn je 3 belangrijkste professionele vaardigheden?",
+                    "type": "textarea",
+                    "required": true,
+                    "max_length": 500,
+                    "placeholder": "1. Toezicht houden op bouwplaatsen\n2. Kennis van omgevingswet & regelgeving\n3. Detail-gericht technisch werk"
+                },
+                {
+                    "name": "unique_value",
+                    "label": "Wat onderscheidt jou van anderen in je vakgebied?",
+                    "type": "textarea",
+                    "required": true,
+                    "max_length": 500,
+                    "placeholder": "Bijv. Combinatie van 22 jaar technische ervaring met toezichtkennis. Oog voor detail die anderen missen."
+                }
+            ]
+        },
+        {
+            "section": "5. Opleiding & Vaardigheden",
+            "section_icon": "🎓",
+            "fields": [
+                {
+                    "name": "education",
+                    "label": "Opleiding(en)",
+                    "type": "textarea",
+                    "required": true,
+                    "max_length": 1000,
+                    "placeholder": "Naam opleiding | Instelling | Jaar afgerond\n\nBijv:\nVMBO Bouwkundig AutoCAD | 2004\nKMBO Motorvoertuigentechniek | 1991"
+                },
+                {
+                    "name": "certificates",
+                    "label": "Relevante certificaten",
+                    "type": "textarea",
+                    "required": false,
+                    "max_length": 500,
+                    "placeholder": "Bijv. VCA Vol (geldig tot 2024), PMP, Scrum Master"
+                },
+                {
+                    "name": "current_skills",
+                    "label": "Vaardigheden die je op LinkedIn wilt tonen",
+                    "type": "textarea",
+                    "required": true,
+                    "max_length": 500,
+                    "placeholder": "Lijst je belangrijkste vaardigheden, gescheiden door komma's.\nBijv. Toezicht, Handhaving, AutoCAD, Bouwregelgeving, Detail-gericht"
+                }
+            ]
+        },
+        {
+            "section": "6. Banner Voorkeuren",
+            "section_icon": "🎨",
+            "fields": [
+                {
+                    "name": "banner_style",
+                    "label": "Welke stijl banner past bij jou?",
+                    "type": "radio",
+                    "required": true,
+                    "options": [
+                        "Modern & Professioneel (strakke lijnen, zakelijk)",
+                        "Tech & Innovatief (geometrisch, futuristisch)",
+                        "Industrieel & Robuust (bouw, techniek, fabriek)",
+                        "Creatief & Opvallend (kleurrijk, dynamisch)",
+                        "Minimalistisch (rustig, clean, weinig elementen)"
+                    ]
+                },
+                {
+                    "name": "banner_color_preference",
+                    "label": "Kleurvoorkeur voor banner",
+                    "type": "radio",
+                    "required": true,
+                    "options": [
+                        "Blauw (professioneel, vertrouwen)",
+                        "Donkergroen (stabiliteit, overheid)",
+                        "Oranje/Amber (energie, actie)",
+                        "Donker/Antraciet (premium, serieus)",
+                        "Laat de agent kiezen op basis van mijn sector"
+                    ]
+                },
+                {
+                    "name": "banner_text_preference",
+                    "label": "Wat wil je op je banner zien?",
+                    "type": "checkbox",
+                    "required": false,
+                    "options": [
+                        "Mijn naam",
+                        "Mijn functietitel",
+                        "Mijn specialisme / tagline",
+                        "Contact informatie",
+                        "Geen tekst, alleen visueel"
+                    ]
+                }
+            ]
+        }
+    ]
+}

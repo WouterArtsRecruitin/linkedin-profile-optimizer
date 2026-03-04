@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.build-env/
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Output
+output/
+*.pdf
+*.png
+*.jpg
+
+# Logs
+*.log
+
+# Node
+node_modules/
+
+# Ngrok
+ngrok.yml
