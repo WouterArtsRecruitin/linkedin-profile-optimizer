@@ -164,7 +164,10 @@ img { display: block; }
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 16px;
 }
-.post-avatar.mc { background: var(--hj-blue); color: var(--hj-yellow); }
+.post-avatar.mc {
+  background: var(--hj-blue); color: var(--hj-yellow);
+  border: 3px solid var(--hj-yellow);
+}
 .post-avatar.jk { background: #3b7a57; color: #fff; }
 .post-meta { flex: 1; min-width: 0; }
 .post-author { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
@@ -585,8 +588,8 @@ img { display: block; }
       <div class="post-header">
         <div class="post-avatar mc">MC</div>
         <div class="post-meta">
-          <div class="post-author">Marc Coolen <span class="post-badge">· 1e</span></div>
-          <div class="post-headline">Vestigingsmanager Wegen bij Heijmans N.V.</div>
+          <div class="post-author">Marc Coolen <svg style="width:16px;height:16px;vertical-align:middle;margin:0 2px" viewBox="0 0 16 16" fill="#0a66c2"><path d="M8 0a8 8 0 108 8 8 8 0 00-8-8zm3.65 5.56l-4.1 5.28a.7.7 0 01-.56.26.72.72 0 01-.53-.22l-2.1-2.1a.75.75 0 011.06-1.06l1.53 1.52 3.58-4.6a.75.75 0 011.12 1z"/></svg> <span class="post-badge">· 1ste</span></div>
+          <div class="post-headline">"Aandacht maakt alles mooier" | Bedrijfsleider | Heijmans Infra 👷 | Regio Zuidwest</div>
           <div class="post-timestamp">2 dagen geleden · <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 107 7 7 7 0 00-7-7zM3 8a5 5 0 011.54-3.59l7.05 7.05A5 5 0 013 8zm9.46 3.59L5.41 4.54A5 5 0 0112.46 11.59z"/></svg></div>
         </div>
         <button class="post-dots">···</button>
