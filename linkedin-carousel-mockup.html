@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Feed — Marc Coolen · Heijmans</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,700;1,400;1,700&family=Barlow+Condensed:ital,wght@0,700;0,900;1,700;1,900&family=Source+Sans+3:wght@300;400;600;700&display=swap');
+
+/* ── CSS Custom Properties ─────────────────────────── */
+:root {
+  /* LinkedIn UI */
+  --li-bg: #f3f2ef;
+  --li-card: #ffffff;
+  --li-border: #e0dfdc;
+  --li-blue: #0a66c2;
+  --li-text: #000000e6;
+  --li-text-sec: #00000099;
+  --li-font: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+  --li-radius: 8px;
+  --li-nav-h: 52px;
+
+  /* Heijmans brand */
+  --hj-yellow: #FFC800;
+  --hj-blue: #1D3057;
+  --hj-red: #E3000F;
+  --hj-white: #FFFFFF;
+}
+
+/* ── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--li-font);
+  background: var(--li-bg);
+  color: var(--li-text);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--li-blue); text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { display: block; }
+
+/* ── Top Navigation ────────────────────────────────── */
+.topnav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--li-card);
+  border-bottom: 1px solid var(--li-border);
+  height: var(--li-nav-h);
+}
+.topnav-inner {
+  max-width: 1128px; margin: 0 auto;
+  display: flex; align-items: center; gap: 8px;
+  height: 100%; padding: 0 16px;
+}
+.nav-logo { width: 34px; height: 34px; flex-shrink: 0; }
+.nav-logo svg { width: 100%; height: 100%; }
+.nav-search {
+  background: #eef3f8; border: none; border-radius: 4px;
+  padding: 0 8px 0 36px; height: 34px; width: 280px;
+  font-size: 14px; color: var(--li-text); position: relative;
+  font-family: var(--li-font);
+}
+.nav-search::placeholder { color: var(--li-text-sec); }
+.search-wrap { position: relative; }
+.search-wrap svg {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; fill: var(--li-text-sec); pointer-events: none;
+}
+.nav-items { display: flex; align-items: center; gap: 0; margin-left: auto; }
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 12px; height: var(--li-nav-h);
+  justify-content: center; gap: 2px;
+  color: var(--li-text-sec); font-size: 12px; min-width: 60px;
+  position: relative; transition: color .15s;
+}
+.nav-item:hover { color: var(--li-text); }
+.nav-item.active { color: var(--li-text); }
+.nav-item.active::after {
+  content: ''; position: absolute; bottom: 0; left: 12px; right: 12px;
+  height: 2px; background: var(--li-text); border-radius: 2px 2px 0 0;
+}
+.nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+.nav-item span { font-size: 12px; white-space: nowrap; }
+.nav-avatar-small {
+  width: 24px; height: 24px; border-radius: 50%; overflow: hidden;
+  background: var(--li-blue); display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 10px; font-weight: 600;
+}
+.nav-sep {
+  width: 1px; height: 40px; background: var(--li-border); margin: 0 4px;
+}
+
+/* ── Layout Grid ───────────────────────────────────── */
+.page-grid {
+  max-width: 1128px; margin: 0 auto;
+  display: grid; grid-template-columns: 225px 1fr 300px;
+  gap: 24px; padding: 24px 16px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .page-grid { grid-template-columns: 1fr; }
+  .sidebar-left, .sidebar-right { display: none; }
+}
+
+/* ── Left Sidebar ──────────────────────────────────── */
+.sidebar-left { position: sticky; top: 76px; }
+.profile-card {
+  background: var(--li-card); border: 1px solid var(--li-border);
+  border-radius: var(--li-radius); overflow: hidden;
+}
+.profile-banner {
+  height: 56px;
+  background: linear-gradient(135deg, var(--hj-blue) 0%, #2a4a7f 100%);
+}
+.profile-avatar-wrap { display: flex; justify-content: center; margin-top: -38px; position: relative; }
+.profile-avatar {
+  width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--li-card);
+  background: var(--li-blue); display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 20px;
+}
+.profile-info { text-align: center; padding: 12px 12px 16px; }
+.profile-name { font-size: 16px; font-weight: 600; }
+.profile-headline { font-size: 12px; color: var(--li-text-sec); margin-top: 4px; }
+.profile-stats { border-top: 1px solid var(--li-border); padding: 12px; }
+.profile-stat {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--li-text-sec); padding: 4px 0;
+}
+.profile-stat .count { color: var(--li-blue); font-weight: 600; }
+
+/* ── Right Sidebar ─────────────────────────────────── */
+.sidebar-right { position: sticky; top: 76px; }
+.news-card {
+  background: var(--li-card); border: 1px solid var(--li-border);
+  border-radius: var(--li-radius); padding: 12px;
+}
+.news-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.news-item { padding: 6px 0; }
+.news-item-title { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.news-item-title::before {
+  content: '•'; margin-right: 6px; color: var(--li-text-sec);
+}
+.news-item-meta { font-size: 12px; color: var(--li-text-sec); padding-left: 14px; }
+.news-footer {
+  font-size: 14px; font-weight: 600; color: var(--li-text-sec);
+  margin-top: 8px; padding: 4px 8px; border-radius: 4px;
+  display: inline-block; cursor: pointer;
+}
+.news-footer:hover { background: #e0dfdc44; }
+
+/* ── Feed (centre column) ──────────────────────────── */
+.feed { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Post Card ─────────────────────────────────────── */
+.post-card {
+  background: var(--li-card); border: 1px solid var(--li-border);
+  border-radius: var(--li-radius); overflow: hidden;
+}
+.post-header { display: flex; gap: 8px; padding: 12px 16px 0; }
+.post-avatar {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px;
+}
+.post-avatar.mc { background: var(--hj-blue); color: var(--hj-yellow); }
+.post-avatar.jk { background: #3b7a57; color: #fff; }
+.post-meta { flex: 1; min-width: 0; }
+.post-author { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.post-badge {
+  font-size: 12px; font-weight: 400; color: var(--li-text-sec);
+}
+.post-headline { font-size: 12px; color: var(--li-text-sec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-timestamp { font-size: 12px; color: var(--li-text-sec); display: flex; align-items: center; gap: 4px; }
+.post-timestamp svg { width: 14px; height: 14px; fill: var(--li-text-sec); }
+.post-dots {
+  width: 32px; height: 32px; display: flex; align-items: center;
+  justify-content: center; border-radius: 50%; flex-shrink: 0;
+  color: var(--li-text-sec); font-size: 20px; margin-top: -4px;
+}
+.post-dots:hover { background: #e0dfdc66; }
+
+/* Post body text */
+.post-body { padding: 8px 16px 0; font-size: 14px; line-height: 1.5; }
+.post-body .more-link {
+  color: var(--li-text-sec); cursor: pointer; font-weight: 600;
+}
+.post-body .more-link:hover { color: var(--li-blue); }
+.post-body .hidden-text { display: none; }
+.post-body.expanded .hidden-text { display: inline; }
+.post-body.expanded .more-link { display: none; }
+
+/* ── Carousel ──────────────────────────────────────── */
+.carousel-wrap {
+  position: relative; margin-top: 12px;
+  overflow: hidden; user-select: none;
+  aspect-ratio: 1 / 1;
+}
+.carousel-track {
+  display: flex; height: 100%;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+.carousel-track.dragging { transition: none; }
+.carousel-slide {
+  min-width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 32px 24px;
+  position: relative;
+}
+
+/* Carousel nav arrows */
+.carousel-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 10; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--li-card); box-shadow: 0 1px 5px rgba(0,0,0,.25);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.carousel-arrow:hover { background: #f0f0f0; }
+.carousel-arrow svg { width: 20px; height: 20px; fill: var(--li-text); }
+.carousel-arrow.left { left: 12px; }
+.carousel-arrow.right { right: 12px; }
+.carousel-arrow.hidden { display: none; }
+
+/* Carousel dots */
+.carousel-dots {
+  display: flex; justify-content: center; gap: 6px;
+  padding: 10px 0;
+}
+.carousel-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--li-border); transition: background .2s;
+  cursor: pointer;
+}
+.carousel-dot.active { background: var(--li-text-sec); }
+
+/* Slide common elements */
+.slide-logo {
+  font-family: 'Barlow', sans-serif; font-weight: 700;
+  font-size: 16px; letter-spacing: .5px;
+}
+.slide-logo .j { color: var(--hj-red); }
+.slide-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 8px;
+}
+.slide-counter {
+  font-family: 'Barlow', sans-serif; font-size: 13px;
+  font-weight: 700; opacity: .5;
+}
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.slide-bottom {
+  display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 16px;
+}
+.slide-bot-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px; flex-shrink: 0;
+}
+.slide-bot-name { font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 700; }
+.slide-bot-role { font-family: 'Barlow', sans-serif; font-size: 11px; opacity: .55; }
+
+/* ── Slide 1 — Hook (yellow) ───────────────────────── */
+.slide-hook { background: var(--hj-yellow); color: var(--hj-blue); }
+.slide-hook .slide-logo { color: var(--hj-blue); }
+.slide-hook .slide-counter { color: var(--hj-blue); }
+.slide-hook .echo {
+  font-family: 'Barlow', sans-serif; font-style: italic; font-size: 15px;
+  color: rgba(29,48,87,.42); margin-bottom: 12px; line-height: 1.4;
+}
+.slide-hook .tag {
+  font-family: 'Barlow', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(29,48,87,.55); margin-bottom: 8px;
+}
+.slide-hook h1 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 48px; line-height: 1; color: var(--hj-blue);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.slide-hook h1 .red { color: var(--hj-red); }
+.slide-hook .sub {
+  font-family: 'Barlow', sans-serif; font-size: 15px;
+  color: rgba(29,48,87,.58);
+}
+.slide-hook .slide-bot-avatar { background: var(--hj-blue); color: var(--hj-yellow); }
+.slide-hook .slide-bot-name { color: var(--hj-blue); }
+
+/* ── Slide 2 — Herkenning (blue) ──────────────────── */
+.slide-herkenning { background: var(--hj-blue); color: var(--hj-white); }
+.slide-herkenning .slide-logo { color: var(--hj-white); }
+.slide-herkenning .slide-counter { color: rgba(255,255,255,.5); }
+.slide-herkenning .quote {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-style: italic; font-size: 26px; line-height: 1.3;
+  border-left: 5px solid var(--hj-yellow); padding-left: 18px;
+  color: var(--hj-white);
+}
+.slide-herkenning .quote .yellow { color: var(--hj-yellow); }
+.slide-herkenning .punch {
+  font-family: 'Barlow', sans-serif; font-size: 15px;
+  color: rgba(255,255,255,.46); margin-top: 18px;
+}
+.slide-herkenning .slide-bot-avatar { background: rgba(255,255,255,.15); color: var(--hj-yellow); }
+.slide-herkenning .slide-bot-name { color: var(--hj-white); }
+
+/* ── Slide 3 — Functie (yellow) ───────────────────── */
+.slide-functie { background: var(--hj-yellow); color: var(--hj-blue); }
+.slide-functie .slide-logo { color: var(--hj-blue); }
+.slide-functie .slide-counter { color: var(--hj-blue); }
+.slide-functie .eyebrow {
+  font-family: 'Barlow', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(29,48,87,.55); margin-bottom: 10px;
+}
+.slide-functie h2 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 52px; line-height: 1; color: var(--hj-blue);
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.slide-functie .facts { display: flex; flex-direction: column; gap: 10px; }
+.slide-functie .fact {
+  border-left: 4px solid var(--hj-red); padding-left: 12px;
+  font-family: 'Barlow', sans-serif; font-size: 14px;
+  font-weight: 700; color: var(--hj-blue);
+}
+.slide-functie .slide-bot-avatar { background: var(--hj-blue); color: var(--hj-yellow); }
+.slide-functie .slide-bot-name { color: var(--hj-blue); }
+
+/* ── Slide 4 — Aanbod (blue) ──────────────────────── */
+.slide-aanbod { background: var(--hj-blue); color: var(--hj-white); }
+.slide-aanbod .slide-logo { color: var(--hj-white); }
+.slide-aanbod .slide-counter { color: rgba(255,255,255,.5); }
+.slide-aanbod .eyebrow {
+  font-family: 'Barlow', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(255,200,0,.42); margin-bottom: 10px;
+}
+.slide-aanbod h2 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 54px; line-height: 1; color: var(--hj-white);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.slide-aanbod h2 .yellow { color: var(--hj-yellow); }
+.slide-aanbod .sub {
+  font-family: 'Barlow', sans-serif; font-size: 15px;
+  color: rgba(255,255,255,.40);
+}
+.slide-aanbod .slide-bot-avatar { background: rgba(255,255,255,.15); color: var(--hj-yellow); }
+.slide-aanbod .slide-bot-name { color: var(--hj-white); }
+
+/* ── Slide 5 — CTA (yellow) ───────────────────────── */
+.slide-cta { background: var(--hj-yellow); color: var(--hj-blue); }
+.slide-cta .slide-logo { color: var(--hj-blue); }
+.slide-cta .slide-counter { color: var(--hj-blue); }
+.slide-cta .tag {
+  font-family: 'Barlow', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(29,48,87,.55); margin-bottom: 8px;
+}
+.slide-cta h2 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 50px; line-height: 1; color: var(--hj-blue);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.slide-cta .sub {
+  font-family: 'Barlow', sans-serif; font-size: 15px;
+  color: rgba(29,48,87,.58); margin-bottom: 18px;
+}
+.slide-cta .cta-box {
+  background: var(--hj-blue); border-radius: 4px;
+  padding: 16px 20px; display: inline-block;
+}
+.slide-cta .cta-name {
+  font-family: 'Barlow', sans-serif; font-weight: 700;
+  font-size: 15px; color: var(--hj-yellow); text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.slide-cta .cta-role {
+  font-family: 'Barlow', sans-serif; font-size: 12px;
+  color: rgba(255,255,255,.50); margin-top: 2px;
+}
+.slide-cta .cta-action {
+  font-family: 'Barlow', sans-serif; font-size: 14px;
+  font-weight: 700; color: var(--hj-yellow); margin-top: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.slide-cta .cta-action::before { content: '→'; }
+.slide-cta .slide-bot-avatar { background: var(--hj-blue); color: var(--hj-yellow); }
+.slide-cta .slide-bot-name { color: var(--hj-blue); }
+
+/* ── Post Reactions ────────────────────────────────── */
+.post-reactions {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 16px; font-size: 13px; color: var(--li-text-sec);
+}
+.reactions-left { display: flex; align-items: center; gap: 4px; }
+.reaction-icons { display: flex; margin-right: 4px; }
+.reaction-icon {
+  width: 20px; height: 20px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 12px;
+  margin-right: -4px; border: 2px solid var(--li-card);
+  position: relative;
+}
+.reaction-icon:nth-child(1) { z-index: 3; background: #1b74e4; }
+.reaction-icon:nth-child(2) { z-index: 2; background: #df704d; }
+.reaction-icon:nth-child(3) { z-index: 1; background: #6dae4f; }
+.reactions-right { display: flex; gap: 8px; }
+.reactions-right span { cursor: pointer; }
+.reactions-right span:hover { text-decoration: underline; color: var(--li-blue); }
+
+/* ── Post Actions ──────────────────────────────────── */
+.post-actions {
+  display: flex; border-top: 1px solid var(--li-border);
+  margin: 0 16px; padding: 4px 0;
+}
+.post-action {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 12px 8px; border-radius: 4px;
+  font-size: 14px; font-weight: 600; color: var(--li-text-sec);
+  transition: background .15s;
+}
+.post-action:hover { background: #e0dfdc66; }
+.post-action.active { color: var(--li-blue); }
+.post-action svg { width: 24px; height: 24px; fill: currentColor; }
+
+/* ── Comments ──────────────────────────────────────── */
+.comments-section { padding: 0 16px 12px; }
+.comment {
+  display: flex; gap: 8px; padding: 8px 0;
+}
+.comment-avatar {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+}
+.comment-bubble {
+  background: #f2f2f2; border-radius: 0 8px 8px 8px;
+  padding: 8px 12px; flex: 1;
+}
+.comment-author { font-size: 13px; font-weight: 600; }
+.comment-author-title { font-size: 12px; color: var(--li-text-sec); }
+.comment-text { font-size: 14px; margin-top: 4px; }
+.comment-meta {
+  display: flex; gap: 12px; margin-top: 4px;
+  font-size: 12px; color: var(--li-text-sec);
+}
+.comment-meta span { cursor: pointer; }
+.comment-meta span:hover { color: var(--li-blue); }
+.comment-meta .liked-count { font-weight: 600; }
+
+/* ── Second Post (preview) ─────────────────────────── */
+.slide-blue-hook { background: var(--hj-blue); color: var(--hj-white); }
+.slide-blue-hook .slide-logo { color: var(--hj-white); }
+.slide-blue-hook .slide-counter { color: rgba(255,255,255,.5); }
+.slide-blue-hook .echo {
+  font-family: 'Barlow', sans-serif; font-style: italic; font-size: 15px;
+  color: rgba(255,255,255,.42); margin-bottom: 12px; line-height: 1.4;
+}
+.slide-blue-hook .tag {
+  font-family: 'Barlow', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(255,255,255,.40); margin-bottom: 8px;
+}
+.slide-blue-hook h1 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 46px; line-height: 1; color: var(--hj-white);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.slide-blue-hook h1 .yellow { color: var(--hj-yellow); }
+.slide-blue-hook .sub {
+  font-family: 'Barlow', sans-serif; font-size: 15px;
+  color: rgba(255,255,255,.50);
+}
+.slide-blue-hook .slide-bot-avatar { background: rgba(255,255,255,.15); color: var(--hj-yellow); }
+.slide-blue-hook .slide-bot-name { color: var(--hj-white); }
+
+/* Slide 2b (yellow) for second carousel */
+.slide-yellow-b { background: var(--hj-yellow); color: var(--hj-blue); }
+.slide-yellow-b .slide-logo { color: var(--hj-blue); }
+.slide-yellow-b .slide-counter { color: var(--hj-blue); }
+.slide-yellow-b h2 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 48px; line-height: 1; color: var(--hj-blue);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.slide-yellow-b .sub {
+  font-family: 'Barlow', sans-serif; font-size: 15px;
+  color: rgba(29,48,87,.58);
+}
+.slide-yellow-b .slide-bot-avatar { background: var(--hj-blue); color: var(--hj-yellow); }
+.slide-yellow-b .slide-bot-name { color: var(--hj-blue); }
+
+/* Slide 3b (blue) for second carousel */
+.slide-blue-b { background: var(--hj-blue); color: var(--hj-white); }
+.slide-blue-b .slide-logo { color: var(--hj-white); }
+.slide-blue-b .slide-counter { color: rgba(255,255,255,.5); }
+.slide-blue-b .quote {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-style: italic; font-size: 26px; line-height: 1.3;
+  border-left: 5px solid var(--hj-yellow); padding-left: 18px;
+  color: var(--hj-white);
+}
+.slide-blue-b .quote .yellow { color: var(--hj-yellow); }
+.slide-blue-b .punch {
+  font-family: 'Barlow', sans-serif; font-size: 15px;
+  color: rgba(255,255,255,.46); margin-top: 18px;
+}
+.slide-blue-b .slide-bot-avatar { background: rgba(255,255,255,.15); color: var(--hj-yellow); }
+.slide-blue-b .slide-bot-name { color: var(--hj-white); }
+</style>
+</head>
+<body>
+
+<!-- ════ TOP NAVIGATION ════ -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <!-- LinkedIn logo -->
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="#0a66c2"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 16 16"><path d="M14.56 12.44L11.3 9.18a5.51 5.51 0 10-2.12 2.12l3.26 3.26a1.5 1.5 0 102.12-2.12zM3 6.5A3.5 3.5 0 116.5 10 3.5 3.5 0 013 6.5z"/></svg>
+      <input class="nav-search" placeholder="Zoeken" type="text">
+    </div>
+    <div class="nav-items">
+      <button class="nav-item active">
+        <svg viewBox="0 0 24 24"><path d="M23 9v2h-2v7a3 3 0 01-3 3h-4v-6h-4v6H6a3 3 0 01-3-3v-7H1V9l11-7z"/></svg>
+        <span>Start</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M12 16v6H3v-6a3 3 0 013-3h3a3 3 0 013 3zm5.5-3A3.5 3.5 0 1014 9.5a3.5 3.5 0 003.5 3.5zm1 2h-2a2.5 2.5 0 00-2.5 2.5V22h7v-4.5a2.5 2.5 0 00-2.5-2.5zM7.5 2A4.5 4.5 0 1012 6.5 4.49 4.49 0 007.5 2z"/></svg>
+        <span>Netwerk</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M17 6V5a3 3 0 00-3-3h-4a3 3 0 00-3 3v1H2v4a3 3 0 003 3h14a3 3 0 003-3V6zM9 5a1 1 0 011-1h4a1 1 0 011 1v1H9zm10 9a4 4 0 003-1.38V17a3 3 0 01-3 3H5a3 3 0 01-3-3v-4.38A4 4 0 005 14z"/></svg>
+        <span>Vacatures</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M16 4H8a7 7 0 000 14h4v4l8.16-5.39A6.78 6.78 0 0023 11a7 7 0 00-7-7zm-8 8.25A1.25 1.25 0 119.25 11 1.25 1.25 0 018 12.25zm4 0A1.25 1.25 0 1113.25 11 1.25 1.25 0 0112 12.25zm4 0A1.25 1.25 0 1117.25 11 1.25 1.25 0 0116 12.25z"/></svg>
+        <span>Berichten</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M22 19h-8.28a2 2 0 11-3.44 0H2v-1a4.52 4.52 0 011.17-2.83l1-1.17h15.7l1 1.17A4.42 4.42 0 0122 18zM18.21 7.44A6.27 6.27 0 0012 2a6.27 6.27 0 00-6.21 5.44L5 13h14z"/></svg>
+        <span>Meldingen</span>
+      </button>
+      <div class="nav-sep"></div>
+      <button class="nav-item">
+        <div class="nav-avatar-small">WA</div>
+        <span>Ik ▾</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ════ PAGE GRID ════ -->
+<div class="page-grid">
+
+  <!-- ── Left Sidebar ── -->
+  <aside class="sidebar-left">
+    <div class="profile-card">
+      <div class="profile-banner"></div>
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar">WA</div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">Wouter Arts</div>
+        <div class="profile-headline">Recruitment Marketing &amp; Employer Branding</div>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat"><span>Profielweergaven</span><span class="count">142</span></div>
+        <div class="profile-stat"><span>Postvertoningen</span><span class="count">1.847</span></div>
+        <div class="profile-stat"><span>Zoekopdrachten</span><span class="count">28</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Feed ── -->
+  <main class="feed">
+
+    <!-- ════ POST 1 — Marc Coolen ════ -->
+    <article class="post-card">
+      <div class="post-header">
+        <div class="post-avatar mc">MC</div>
+        <div class="post-meta">
+          <div class="post-author">Marc Coolen <span class="post-badge">· 1e</span></div>
+          <div class="post-headline">Vestigingsmanager Wegen bij Heijmans N.V.</div>
+          <div class="post-timestamp">2 dagen geleden · <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 107 7 7 7 0 00-7-7zM3 8a5 5 0 011.54-3.59l7.05 7.05A5 5 0 013 8zm9.46 3.59L5.41 4.54A5 5 0 0112.46 11.59z"/></svg></div>
+        </div>
+        <button class="post-dots">···</button>
+      </div>
+
+      <div class="post-body" id="postBody1">
+        Ik zoek geen uitvoerder die orders uitvoert. Ik zoek er één die de baas is op de weg.<span class="hidden-text"> Iemand die 's ochtends op de bouwplaats staat en al weet wat er die dag mis gaat — vóór het misgaat.</span><span class="more-link" onclick="this.parentElement.classList.add('expanded')">...meer</span>
+      </div>
+
+      <!-- Carousel -->
+      <div class="carousel-wrap" id="carousel1">
+        <div class="carousel-track" id="track1">
+
+          <!-- Slide 1 — Hook -->
+          <div class="carousel-slide slide-hook">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">1 / 5</div>
+            </div>
+            <div class="slide-content">
+              <div class="echo">Iemand die goed werk doet, verdient het om dat te weten.</div>
+              <div class="tag">Vestigingsmanager Wegen · Heijmans</div>
+              <h1>Ik zoek geen<br>uitvoerder<br>die orders<br><span class="red">uitvoert.</span></h1>
+              <div class="sub">Ik zoek er één die de baas is op de weg.</div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">MC</div>
+              <div>
+                <div class="slide-bot-name">Marc Coolen</div>
+                <div class="slide-bot-role">Vestigingsmanager Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2 — Herkenning -->
+          <div class="carousel-slide slide-herkenning">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">2 / 5</div>
+            </div>
+            <div class="slide-content">
+              <div class="quote">
+                Planning klopt niet.<br>
+                Materiaal te laat.<br>
+                <span class="yellow">Jij lost het op.</span>
+              </div>
+              <div class="punch">En je collega's zien het. Dat beloof ik.</div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">MC</div>
+              <div>
+                <div class="slide-bot-name">Marc Coolen</div>
+                <div class="slide-bot-role">Vestigingsmanager Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 3 — Functie -->
+          <div class="carousel-slide slide-functie">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">3 / 5</div>
+            </div>
+            <div class="slide-content">
+              <div class="eyebrow">De functie</div>
+              <h2>Senior<br>Uitvoerder<br>Wegen.</h2>
+              <div class="facts">
+                <div class="fact">Eigen ploeg. Jij stuurt.</div>
+                <div class="fact">Grote GWW-projecten in de regio.</div>
+                <div class="fact">VCA VOL + GWW-ervaring vereist.</div>
+              </div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">MC</div>
+              <div>
+                <div class="slide-bot-name">Marc Coolen</div>
+                <div class="slide-bot-role">Vestigingsmanager Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 4 — Aanbod -->
+          <div class="carousel-slide slide-aanbod">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">4 / 5</div>
+            </div>
+            <div class="slide-content">
+              <div class="eyebrow">Wat jij krijgt</div>
+              <h2>Vast.<br><span class="yellow">Lease.</span><br>Vrijheid.</h2>
+              <div class="sub">Een manager die je vertrouwt — en met rust laat als je het goed doet.</div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">MC</div>
+              <div>
+                <div class="slide-bot-name">Marc Coolen</div>
+                <div class="slide-bot-role">Vestigingsmanager Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 5 — CTA -->
+          <div class="carousel-slide slide-cta">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">5 / 5</div>
+            </div>
+            <div class="slide-content">
+              <div class="tag">Ben jij die uitvoerder?</div>
+              <h2>Geen<br>formulier.<br>Gewoon<br>bellen.</h2>
+              <div class="sub">Stuur me een DM. Dan plannen we iets in.</div>
+              <div class="cta-box">
+                <div class="cta-name">Marc Coolen</div>
+                <div class="cta-role">Vestigingsmanager Wegen · Heijmans</div>
+                <div class="cta-action">DM via LinkedIn</div>
+              </div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">MC</div>
+              <div>
+                <div class="slide-bot-name">Marc Coolen</div>
+                <div class="slide-bot-role">Vestigingsmanager Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /track -->
+
+        <!-- Arrows -->
+        <button class="carousel-arrow left hidden" data-carousel="carousel1" data-dir="-1">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <button class="carousel-arrow right" data-carousel="carousel1" data-dir="1">
+          <svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+        </button>
+      </div>
+
+      <!-- Dots -->
+      <div class="carousel-dots" id="dots1">
+        <span class="carousel-dot active" data-carousel="carousel1" data-slide="0"></span>
+        <span class="carousel-dot" data-carousel="carousel1" data-slide="1"></span>
+        <span class="carousel-dot" data-carousel="carousel1" data-slide="2"></span>
+        <span class="carousel-dot" data-carousel="carousel1" data-slide="3"></span>
+        <span class="carousel-dot" data-carousel="carousel1" data-slide="4"></span>
+      </div>
+
+      <!-- Reactions -->
+      <div class="post-reactions">
+        <div class="reactions-left">
+          <div class="reaction-icons">
+            <span class="reaction-icon">👍</span>
+            <span class="reaction-icon">❤️</span>
+            <span class="reaction-icon">🙌</span>
+          </div>
+          Wouter Arts en 247 anderen
+        </div>
+        <div class="reactions-right">
+          <span>38 reacties</span> · <span>104 reposts</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="post-actions">
+        <button class="post-action active">
+          <svg viewBox="0 0 24 24"><path d="M19.46 11l-3.91-3.91a7 7 0 01-1.69-2.74l-.49-1.47A2.76 2.76 0 0010.76 1 2.75 2.75 0 008 3.74v1.12a9.19 9.19 0 00.46 2.85L8.89 9H4.12A2.12 2.12 0 002 11.12a2.16 2.16 0 00.92 1.76A2.11 2.11 0 002 14.62a2.14 2.14 0 001.28 2 2 2 0 00-.28 1 2.12 2.12 0 002 2.12v.14A2.12 2.12 0 007.12 22h7.49a8.08 8.08 0 003.58-.84l.31-.16H21V11z"/></svg>
+          <span>Vind ik leuk</span>
+        </button>
+        <button class="post-action">
+          <svg viewBox="0 0 24 24"><path d="M7 9h10v1H7zm0 4h7v-1H7zm16-2a6.78 6.78 0 01-2.84 5.61L12 22v-4H8A7 7 0 018 4h8a7 7 0 017 7z"/></svg>
+          <span>Reageren</span>
+        </button>
+        <button class="post-action">
+          <svg viewBox="0 0 24 24"><path d="M13.96 5H6C3.79 5 2 6.79 2 9s1.79 4 4 4h1.52l1.39 2.78a1.5 1.5 0 002.68 0L12.98 13H14c2.21 0 4-1.79 4-4s-1.79-4-4-4zm6 0h-1.52a5.51 5.51 0 01.52 2.33A5.52 5.52 0 0113.48 13h-.52l-1.39 2.78a1.47 1.47 0 01-.37.48A4 4 0 0018 13h.04c2.21 0 4-1.79 4-4s-1.79-4-4-4z"/></svg>
+          <span>Reposten</span>
+        </button>
+        <button class="post-action">
+          <svg viewBox="0 0 24 24"><path d="M21 3L0 10l7.66 4.26L16 8l-6.26 8.34L14 24l7-21z"/></svg>
+          <span>Sturen</span>
+        </button>
+      </div>
+
+      <!-- Comments -->
+      <div class="comments-section">
+        <div class="comment">
+          <div class="comment-avatar" style="background:#3a6b8f">JB</div>
+          <div>
+            <div class="comment-bubble">
+              <div class="comment-author">Jan van der Berg</div>
+              <div class="comment-author-title">Senior Uitvoerder Regio Oost</div>
+              <div class="comment-text">Dit herken ik. DM gestuurd Marc 👊</div>
+            </div>
+            <div class="comment-meta">
+              <span>Vind ik leuk</span>
+              <span class="liked-count">14</span>
+              <span>Reageren</span>
+              <span>1 d</span>
+            </div>
+          </div>
+        </div>
+        <div class="comment">
+          <div class="comment-avatar" style="background:#6b4c8f">RB</div>
+          <div>
+            <div class="comment-bubble">
+              <div class="comment-author">Rens Bos</div>
+              <div class="comment-author-title">Uitvoerder GWW Arnhem</div>
+              <div class="comment-text">Eindelijk een vacature die niet klinkt als een functieprofiel van HR 😄</div>
+            </div>
+            <div class="comment-meta">
+              <span>Vind ik leuk</span>
+              <span class="liked-count">8</span>
+              <span>Reageren</span>
+              <span>23 u</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ════ POST 2 — Collega Senior Uitvoerder ════ -->
+    <article class="post-card">
+      <div class="post-header">
+        <div class="post-avatar jk">JK</div>
+        <div class="post-meta">
+          <div class="post-author">Joost Kuipers <span class="post-badge">· 2e</span></div>
+          <div class="post-headline">Senior Uitvoerder Wegen bij Heijmans N.V.</div>
+          <div class="post-timestamp">5 dagen geleden · <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 107 7 7 7 0 00-7-7zM3 8a5 5 0 011.54-3.59l7.05 7.05A5 5 0 013 8zm9.46 3.59L5.41 4.54A5 5 0 0112.46 11.59z"/></svg></div>
+        </div>
+        <button class="post-dots">···</button>
+      </div>
+
+      <div class="post-body">
+        Drie maanden geleden zat ik nog te twijfelen. Nu stuur ik mijn eigen ploeg aan op een van de mooiste GWW-projecten in de regio. Soms moet je gewoon die DM sturen.
+      </div>
+
+      <!-- Carousel 2 (3 slides) -->
+      <div class="carousel-wrap" id="carousel2">
+        <div class="carousel-track" id="track2">
+
+          <!-- Slide 1 (blue) -->
+          <div class="carousel-slide slide-blue-hook">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">1 / 3</div>
+            </div>
+            <div class="slide-content">
+              <div class="tag">Senior Uitvoerder Wegen · Heijmans</div>
+              <h1>Ik twijfelde.<br>Toen stuurde ik<br>die <span class="yellow">DM.</span></h1>
+              <div class="sub">Drie maanden later sta ik hier. Met mijn eigen ploeg.</div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">JK</div>
+              <div>
+                <div class="slide-bot-name">Joost Kuipers</div>
+                <div class="slide-bot-role">Senior Uitvoerder Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2 (yellow) -->
+          <div class="carousel-slide slide-yellow-b">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">2 / 3</div>
+            </div>
+            <div class="slide-content">
+              <h2>Eigen ploeg.<br>Groot project.<br>Vrijheid.</h2>
+              <div class="sub">Dat werd me beloofd. En dat is precies wat ik kreeg.</div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">JK</div>
+              <div>
+                <div class="slide-bot-name">Joost Kuipers</div>
+                <div class="slide-bot-role">Senior Uitvoerder Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 3 (blue) -->
+          <div class="carousel-slide slide-blue-b">
+            <div class="slide-top">
+              <div class="slide-logo">hei<span class="j">j</span>mans</div>
+              <div class="slide-counter">3 / 3</div>
+            </div>
+            <div class="slide-content">
+              <div class="quote">
+                Geen formulieren.<br>
+                Geen HR-praatjes.<br>
+                <span class="yellow">Gewoon een goed gesprek.</span>
+              </div>
+              <div class="punch">Stuur Marc een DM. Dat deed ik ook.</div>
+            </div>
+            <div class="slide-bottom">
+              <div class="slide-bot-avatar">JK</div>
+              <div>
+                <div class="slide-bot-name">Joost Kuipers</div>
+                <div class="slide-bot-role">Senior Uitvoerder Wegen · Heijmans</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /track2 -->
+
+        <button class="carousel-arrow left hidden" data-carousel="carousel2" data-dir="-1">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <button class="carousel-arrow right" data-carousel="carousel2" data-dir="1">
+          <svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+        </button>
+      </div>
+
+      <div class="carousel-dots" id="dots2">
+        <span class="carousel-dot active" data-carousel="carousel2" data-slide="0"></span>
+        <span class="carousel-dot" data-carousel="carousel2" data-slide="1"></span>
+        <span class="carousel-dot" data-carousel="carousel2" data-slide="2"></span>
+      </div>
+
+      <!-- Reactions -->
+      <div class="post-reactions">
+        <div class="reactions-left">
+          <div class="reaction-icons">
+            <span class="reaction-icon">👍</span>
+            <span class="reaction-icon">❤️</span>
+            <span class="reaction-icon">🙌</span>
+          </div>
+          Marc Coolen en 89 anderen
+        </div>
+        <div class="reactions-right">
+          <span>12 reacties</span> · <span>31 reposts</span>
+        </div>
+      </div>
+
+      <div class="post-actions">
+        <button class="post-action">
+          <svg viewBox="0 0 24 24"><path d="M19.46 11l-3.91-3.91a7 7 0 01-1.69-2.74l-.49-1.47A2.76 2.76 0 0010.76 1 2.75 2.75 0 008 3.74v1.12a9.19 9.19 0 00.46 2.85L8.89 9H4.12A2.12 2.12 0 002 11.12a2.16 2.16 0 00.92 1.76A2.11 2.11 0 002 14.62a2.14 2.14 0 001.28 2 2 2 0 00-.28 1 2.12 2.12 0 002 2.12v.14A2.12 2.12 0 007.12 22h7.49a8.08 8.08 0 003.58-.84l.31-.16H21V11z"/></svg>
+          <span>Vind ik leuk</span>
+        </button>
+        <button class="post-action">
+          <svg viewBox="0 0 24 24"><path d="M7 9h10v1H7zm0 4h7v-1H7zm16-2a6.78 6.78 0 01-2.84 5.61L12 22v-4H8A7 7 0 018 4h8a7 7 0 017 7z"/></svg>
+          <span>Reageren</span>
+        </button>
+        <button class="post-action">
+          <svg viewBox="0 0 24 24"><path d="M13.96 5H6C3.79 5 2 6.79 2 9s1.79 4 4 4h1.52l1.39 2.78a1.5 1.5 0 002.68 0L12.98 13H14c2.21 0 4-1.79 4-4s-1.79-4-4-4zm6 0h-1.52a5.51 5.51 0 01.52 2.33A5.52 5.52 0 0113.48 13h-.52l-1.39 2.78a1.47 1.47 0 01-.37.48A4 4 0 0018 13h.04c2.21 0 4-1.79 4-4s-1.79-4-4-4z"/></svg>
+          <span>Reposten</span>
+        </button>
+        <button class="post-action">
+          <svg viewBox="0 0 24 24"><path d="M21 3L0 10l7.66 4.26L16 8l-6.26 8.34L14 24l7-21z"/></svg>
+          <span>Sturen</span>
+        </button>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- ── Right Sidebar ── -->
+  <aside class="sidebar-right">
+    <div class="news-card">
+      <div class="news-title">LinkedIn Nieuws</div>
+      <div class="news-item">
+        <div class="news-item-title">Bouwsector kampt met personeelstekort</div>
+        <div class="news-item-meta">4 u geleden · 2.841 lezers</div>
+      </div>
+      <div class="news-item">
+        <div class="news-item-title">GWW-sector groeit ondanks uitdagingen</div>
+        <div class="news-item-meta">6 u geleden · 1.203 lezers</div>
+      </div>
+      <div class="news-item">
+        <div class="news-item-title">Employer branding steeds belangrijker</div>
+        <div class="news-item-meta">8 u geleden · 967 lezers</div>
+      </div>
+      <div class="news-item">
+        <div class="news-item-title">LinkedIn lanceert nieuwe carrousel-functie</div>
+        <div class="news-item-meta">10 u geleden · 4.512 lezers</div>
+      </div>
+      <div class="news-item">
+        <div class="news-item-title">Vacaturemarkt infra trekt aan in Q1</div>
+        <div class="news-item-meta">12 u geleden · 823 lezers</div>
+      </div>
+      <div class="news-footer">Meer weergeven →</div>
+    </div>
+  </aside>
+
+</div><!-- /page-grid -->
+
+<!-- ════ JAVASCRIPT ════ -->
+<script>
+(function() {
+  'use strict';
+
+  // Carousel state per instance
+  const carousels = {};
+
+  function initCarousel(id) {
+    const wrap = document.getElementById(id);
+    const track = wrap.querySelector('.carousel-track');
+    const slides = track.querySelectorAll('.carousel-slide');
+    const dotsWrap = document.getElementById(id.replace('carousel', 'dots'));
+    const dots = dotsWrap ? dotsWrap.querySelectorAll('.carousel-dot') : [];
+    const leftArr = wrap.querySelector('.carousel-arrow.left');
+    const rightArr = wrap.querySelector('.carousel-arrow.right');
+    const total = slides.length;
+
+    const state = { current: 0, dragging: false, startX: 0, currentX: 0, moved: false };
+    carousels[id] = state;
+
+    function goSlide(n) {
+      state.current = Math.max(0, Math.min(total - 1, n));
+      track.style.transform = 'translateX(-' + (state.current * 100) + '%)';
+      // Update dots
+      dots.forEach(function(d, i) { d.classList.toggle('active', i === state.current); });
+      // Update arrows
+      if (leftArr) leftArr.classList.toggle('hidden', state.current === 0);
+      if (rightArr) rightArr.classList.toggle('hidden', state.current === total - 1);
+    }
+
+    function slide(dir) { goSlide(state.current + dir); }
+
+    // Arrow clicks
+    wrap.querySelectorAll('.carousel-arrow').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        slide(parseInt(btn.dataset.dir));
+      });
+    });
+
+    // Dot clicks
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        goSlide(parseInt(dot.dataset.slide));
+      });
+    });
+
+    // Mouse drag
+    wrap.addEventListener('mousedown', function(e) {
+      state.dragging = true;
+      state.moved = false;
+      state.startX = e.clientX;
+      state.currentX = e.clientX;
+      track.classList.add('dragging');
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (!state.dragging) return;
+      state.currentX = e.clientX;
+      var diff = state.currentX - state.startX;
+      if (Math.abs(diff) > 5) state.moved = true;
+      var pct = -(state.current * 100) + (diff / wrap.offsetWidth * 100);
+      track.style.transform = 'translateX(' + pct + '%)';
+    });
+
+    window.addEventListener('mouseup', function() {
+      if (!state.dragging) return;
+      state.dragging = false;
+      track.classList.remove('dragging');
+      var diff = state.currentX - state.startX;
+      var threshold = wrap.offsetWidth * 0.15;
+      if (diff < -threshold) slide(1);
+      else if (diff > threshold) slide(-1);
+      else goSlide(state.current);
+    });
+
+    // Touch drag
+    wrap.addEventListener('touchstart', function(e) {
+      state.dragging = true;
+      state.moved = false;
+      state.startX = e.touches[0].clientX;
+      state.currentX = e.touches[0].clientX;
+      track.classList.add('dragging');
+    }, { passive: true });
+
+    wrap.addEventListener('touchmove', function(e) {
+      if (!state.dragging) return;
+      state.currentX = e.touches[0].clientX;
+      var diff = state.currentX - state.startX;
+      if (Math.abs(diff) > 5) state.moved = true;
+      var pct = -(state.current * 100) + (diff / wrap.offsetWidth * 100);
+      track.style.transform = 'translateX(' + pct + '%)';
+    }, { passive: true });
+
+    wrap.addEventListener('touchend', function() {
+      if (!state.dragging) return;
+      state.dragging = false;
+      track.classList.remove('dragging');
+      var diff = state.currentX - state.startX;
+      var threshold = wrap.offsetWidth * 0.15;
+      if (diff < -threshold) slide(1);
+      else if (diff > threshold) slide(-1);
+      else goSlide(state.current);
+    });
+
+    // Init
+    goSlide(0);
+  }
+
+  // Initialize all carousels
+  initCarousel('carousel1');
+  initCarousel('carousel2');
+})();
+</script>
+
+</body>
+</html>
