@@ -93,7 +93,7 @@ async function saveToSupabase(formData) {
     }
   );
 
-  if (supabaseRes.status !== 200 && supabaseRes.status !== 201) {
+  if (supabaseRes.status !== 200 && supabaseRes.status !== 201 && supabaseRes.status !== 204) {
     throw new Error(`Supabase error: ${supabaseRes.status} - ${JSON.stringify(supabaseRes.body)}`);
   }
 
