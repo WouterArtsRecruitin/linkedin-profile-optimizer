@@ -10,7 +10,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="style.css?v=6">
@@ -85,13 +85,8 @@
         <div class="hero-overlay"></div>
         <div class="container hero-inner">
             <div class="hero-content">
-                <div class="urgency-badge">
-                    <span class="pulse"></span>
-                    Nog <strong>12 plekken</strong> deze week
-                </div>
                 <h1>Verbeter je LinkedIn profiel.<br><span class="highlight">Genereer meer leads.</span></h1>
-                <p class="hero-sub">Ontvang binnen 24 uur een persoonlijk rapport met je score, verbeterde teksten en
-                    een op-maat gemaakte banner. <strong>100% gratis.</strong></p>
+                <p class="hero-sub">Ontvang een gratis rapport met je score en herschreven teksten. <strong>Binnen 24u.</strong></p>
 
                 <!-- Inline form -->
                 <form class="hero-form" id="quickForm" onsubmit="submitForm(event)">
@@ -105,8 +100,9 @@
                     </div>
                     <p class="form-disclaimer">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.
                         Gegevens worden na 30 dagen verwijderd.</p>
+                    <p class="trust-strip">Gratis · Geen installatie · Binnen 24u</p>
                 </form>
-                <p class="form-error" id="formError" style="display:none; color: #ef7d00; font-size: 14px; margin-top: 8px;"></p>
+                <p class="form-error" id="formError" style="display:none; color: #FF5500; font-size: 14px; margin-top: 8px;"></p>
 
                 <div class="hero-stats">
                     <div class="stat">
@@ -172,61 +168,40 @@
         </div>
     </section>
 
-    <!-- ========== 3 STAPPEN (direct onder hero) ========== -->
-    <section class="steps-strip">
-        <div class="container">
-            <div class="steps-inline">
-                <div class="step-inline">
-                    <div class="step-num">1</div>
-                    <div>
-                        <strong>URL invullen</strong>
-                        <span>10 seconden, meer niet</span>
-                    </div>
-                </div>
-                <div class="step-chevron">›</div>
-                <div class="step-inline">
-                    <div class="step-num">2</div>
-                    <div>
-                        <strong>AI analyseert</strong>
-                        <span>10 criteria, 1 rapport</span>
-                    </div>
-                </div>
-                <div class="step-chevron">›</div>
-                <div class="step-inline">
-                    <div class="step-num">3</div>
-                    <div>
-                        <strong>Inbox checken</strong>
-                        <span>Score + teksten + banner</span>
-                    </div>
-                </div>
-            </div>
+    <!-- ========== MARQUEE STRIP (direct onder hero) ========== -->
+    <section class="marquee-strip">
+        <div class="marquee-track">
+            <span>127 Profielen geanalyseerd</span><span class="dot">✦</span>
+            <span>Gratis rapport</span><span class="dot">✦</span>
+            <span>Binnen 24u in je inbox</span><span class="dot">✦</span>
+            <span>+68% meer reacties</span><span class="dot">✦</span>
+            <span>127 Profielen geanalyseerd</span><span class="dot">✦</span>
+            <span>Gratis rapport</span><span class="dot">✦</span>
+            <span>Binnen 24u in je inbox</span><span class="dot">✦</span>
+            <span>+68% meer reacties</span><span class="dot">✦</span>
         </div>
     </section>
 
     <!-- ========== WAT JE KRIJGT ========== -->
     <section class="benefits">
         <div class="container">
-            <h2>Dit zit in je <span class="highlight">gratis rapport</span></h2>
+            <span class="eyebrow">Wat je ontvangt</span>
+            <h2>Alles in één <span class="highlight">rapport</span></h2>
             <div class="benefits-grid">
                 <div class="benefit">
-                    <div class="benefit-icon">📊</div>
-                    <h3>Profiel Score (0-100)</h3>
-                    <p>Exacte score op 10 criteria. Je weet precies waar je staat én waar je kunt verbeteren.</p>
+                    <div class="benefit-dot"></div>
+                    <h3>Profiel Score</h3>
+                    <p>Je exacte score op alle criteria.</p>
                 </div>
                 <div class="benefit">
-                    <div class="benefit-icon">✍️</div>
-                    <h3>Herschreven Headline & About</h3>
-                    <p>Kant-en-klare teksten geschreven met het StoryBrand framework. Kopiëren en plakken.</p>
+                    <div class="benefit-dot"></div>
+                    <h3>Herschreven Teksten</h3>
+                    <p>Headline & About kant-en-klaar.</p>
                 </div>
                 <div class="benefit">
-                    <div class="benefit-icon">🎨</div>
-                    <h3>Professionele Banner</h3>
-                    <p>Op maat ontworpen voor jouw sector. Direct te uploaden naar je profiel.</p>
-                </div>
-                <div class="benefit">
-                    <div class="benefit-icon">🔍</div>
-                    <h3>SEO Keywords Analyse</h3>
-                    <p>De juiste keywords zodat recruiters en klanten jou vinden via LinkedIn search.</p>
+                    <div class="benefit-dot"></div>
+                    <h3>Banner & Keywords</h3>
+                    <p>Professionele banner + SEO tips.</p>
                 </div>
             </div>
         </div>
@@ -236,16 +211,8 @@
     <section class="preview-section">
         <div class="container preview-inner">
             <div class="preview-text">
-                <h2>Zo ziet jouw rapport eruit</h2>
-                <p>Een compleet overzicht met score, verbeterpunten, herschreven teksten en je nieuwe banner. Alles wat
-                    je nodig hebt in één PDF.</p>
-                <ul class="preview-list">
-                    <li>✅ Persoonlijke score per criterium</li>
-                    <li>✅ Verbeterde headline & about (copy-paste ready)</li>
-                    <li>✅ Professionele banner op maat</li>
-                    <li>✅ Top-3 quick wins voor direct resultaat</li>
-                </ul>
-                <button class="btn-secondary" onclick="scrollToForm()">Ik wil dit rapport →</button>
+                <span class="eyebrow">Je rapport</span>
+                <h2>Alles wat je nodig hebt in één PDF</h2>
             </div>
             <div class="preview-mockup">
                 <div class="mockup-page">
@@ -277,6 +244,7 @@
     <!-- ========== SOCIAL PROOF ========== -->
     <section class="reviews">
         <div class="container">
+            <span class="eyebrow">Testimonials</span>
             <h2>Van sceptisch naar <span class="highlight">overtuigd</span></h2>
             <div class="reviews-grid">
                 <div class="review">
@@ -288,8 +256,7 @@
                         </div>
                     </div>
                     <div class="stars">★★★★★</div>
-                    <p>"Mijn profiel scoorde een <strong>42</strong>. Na de verbeteringen: <strong>87</strong>. Binnen
-                        een week 3x meer profielweergaven."</p>
+                    <p>"Score ging van 42 naar 87. 3x meer profielweergaven in een week."</p>
                     <div class="result-badge">+3x profielweergaven</div>
                 </div>
                 <div class="review">
@@ -301,67 +268,18 @@
                         </div>
                     </div>
                     <div class="stars">★★★★★</div>
-                    <p>"De banner is echt professioneel. Collega's vragen waar ik die heb laten maken. De herschreven
-                        about is spot-on."</p>
-                    <div class="result-badge">Professionele uitstraling</div>
-                </div>
-                <div class="review">
-                    <div class="review-top">
-                        <div class="review-avatar">JB</div>
-                        <div>
-                            <strong>Jan de Boer</strong>
-                            <span>IT Consultant · Software</span>
-                        </div>
-                    </div>
-                    <div class="stars">★★★★★</div>
-                    <p>"Na het updaten werd ik benaderd door <strong>2 recruiters</strong> in de eerste week. De SEO
-                        tips maakten het verschil."</p>
-                    <div class="result-badge">2 recruiter-benaderings</div>
+                    <p>"De banner en teksten zijn professioneel. Recruiter contacteerde mij binnen 3 dagen."</p>
+                    <div class="result-badge">Recruiter contact</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ========== FAQ ========== -->
-    <section class="faq">
-        <div class="container faq-inner">
-            <h2>Veelgestelde vragen</h2>
-            <details>
-                <summary>Is dit echt 100% gratis?</summary>
-                <p>Ja. Geen kosten, geen verplichtingen, geen upsell. Wij doen dit om ons netwerk te laten zien wat
-                    Recruitin kan.</p>
-            </details>
-            <details>
-                <summary>Hoe lang duurt het?</summary>
-                <p>Invullen: 10 seconden. Rapport ontvangen: binnen 24 uur per e-mail.</p>
-            </details>
-            <details>
-                <summary>Wat doen jullie met mijn gegevens?</summary>
-                <p>Uitsluitend voor de analyse. Na 30 dagen automatisch verwijderd. Nooit gedeeld met derden. 100%
-                    AVG-conform.</p>
-            </details>
-            <details>
-                <summary>Moet ik iets installeren of een account aanmaken?</summary>
-                <p>Nee. Geen account, geen download, geen installatie. Alleen je LinkedIn URL en e-mail invullen.</p>
-            </details>
-            <details>
-                <summary>Wat als mijn profiel al goed is?</summary>
-                <p>Dan hoor je dat! Je krijgt een eerlijke score met focus op de laatste verbeterpunten voor een perfect
-                    profiel.</p>
-            </details>
-        </div>
-    </section>
-
-    <!-- ========== FINAL CTA ========== -->
+<!-- ========== FINAL CTA ========== -->
     <section class="final-cta">
         <div class="final-overlay"></div>
         <div class="container final-inner">
-            <div class="urgency-badge urgency-light">
-                <span class="pulse"></span>
-                Nog <strong>12 plekken</strong> deze week
-            </div>
-            <h2>Je profiel verbeteren begint hier</h2>
-            <p>10 seconden invullen. 24 uur wachten. Jaren profiteren.</p>
+            <h2>Klaar om te <span class="highlight">beginnen</span>?</h2>
             <button class="btn-white" onclick="scrollToForm()">Ontvang mijn gratis rapport →</button>
         </div>
     </section>
