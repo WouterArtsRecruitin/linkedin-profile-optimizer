@@ -13,7 +13,7 @@ const https = require('https');
 
 // Environment variables
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jdistoacicmzdazdaubh.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const LEMLIST_API_KEY = process.env.LEMLIST_API_KEY;
 const LEMLIST_CAMPAIGN_ID = process.env.LEMLIST_CAMPAIGN_ID;
 
@@ -81,8 +81,8 @@ async function saveToSupabase(formData) {
     'POST',
     '/rest/v1/profielscore_leads',
     {
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+      'apikey': SUPABASE_SERVICE_KEY,
       'Prefer': 'return=minimal'
     },
     {
