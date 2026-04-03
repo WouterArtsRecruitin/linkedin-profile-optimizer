@@ -101,7 +101,18 @@ h2 {
 }
 
 .nav-logo {
-    height: 36px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--white);
+}
+
+.logo-text {
+    color: var(--text);
+}
+
+.logo-accent {
+    color: var(--magenta);
 }
 
 .nav-cta {
