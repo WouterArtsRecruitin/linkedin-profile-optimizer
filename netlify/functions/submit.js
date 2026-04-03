@@ -12,9 +12,13 @@
 const https = require('https');
 
 // Environment variables
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jdistoacicmzdazdaubh.supabase.co';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const LEMLIST_API_KEY = process.env.LEMLIST_API_KEY;
 const LEMLIST_CAMPAIGN_ID = process.env.LEMLIST_CAMPAIGN_ID;
+
+// Parse Supabase hostname from URL
+const SUPABASE_HOST = SUPABASE_URL.replace('https://', '').replace('http://', '');
 
 /**
  * Make HTTPS request
@@ -73,22 +77,19 @@ async function saveToSupabase(formData) {
   const { linkedin_url, email, voornaam, achternaam, telefoonnummer, doel } = formData;
 
   const supabaseRes = await makeRequest(
-    'vrzwupnqwodqdtnmtwse.supabase.co',
+    SUPABASE_HOST,
     'POST',
     '/rest/v1/profielscore_leads',
     {
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'apikey': SUPABASE_ANON_KEY,
       'Prefer': 'return=minimal'
     },
     {
       linkedin_url,
       email,
-      first_name: voornaam || null,
-      last_name: achternaam || null,
-      phone: telefoonnummer || null,
-      goal: doel,
-      source: 'profielscore-landing',
-      created_at: new Date().toISOString()
+      status: 'nieuw',
+      source: doel ? `profielscore-${doel}` : 'profielscore-landing'
     }
   );
 
