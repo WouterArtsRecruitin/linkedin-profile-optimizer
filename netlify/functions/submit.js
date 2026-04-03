@@ -3,7 +3,7 @@
  * Netlify Serverless Function
  *
  * Flow:
- * 1. Receive form data (LinkedIn URL, email, name, goal)
+ * 1. Receive form data (LinkedIn URL, email, name, company)
  * 2. Save to Supabase (profielscore_leads table)
  * 3. Add to Lemlist campaign
  * 4. Return success
@@ -13,7 +13,7 @@ const https = require('https');
 
 // Environment variables
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jdistoacicmzdazdaubh.supabase.co';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const LEMLIST_API_KEY = process.env.LEMLIST_API_KEY;
 const LEMLIST_CAMPAIGN_ID = process.env.LEMLIST_CAMPAIGN_ID;
 
@@ -74,22 +74,26 @@ function validateEmail(email) {
  * Save to Supabase
  */
 async function saveToSupabase(formData) {
-  const { linkedin_url, email, voornaam, achternaam, telefoonnummer, doel } = formData;
+  const { linkedin_url, email, voornaam, achternaam, telefoonnummer, bedrijfsnaam } = formData;
 
   const supabaseRes = await makeRequest(
     SUPABASE_HOST,
     'POST',
     '/rest/v1/profielscore_leads',
     {
-      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-      'apikey': SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'apikey': SUPABASE_ANON_KEY,
       'Prefer': 'return=minimal'
     },
     {
       linkedin_url,
       email,
+      voornaam: voornaam || null,
+      achternaam: achternaam || null,
+      telefoonnummer: telefoonnummer || null,
+      bedrijfsnaam: bedrijfsnaam || null,
       status: 'nieuw',
-      source: doel ? `profielscore-${doel}` : 'profielscore-landing'
+      source: 'profielscore-landing'
     }
   );
 
@@ -154,7 +158,7 @@ exports.handler = async (event) => {
 
   try {
     const formData = JSON.parse(event.body);
-    const { linkedin_url, email, voornaam, achternaam, telefoonnummer, doel } = formData;
+    const { linkedin_url, email, voornaam, achternaam, telefoonnummer, bedrijfsnaam } = formData;
 
     if (!linkedin_url || !email) {
       return {
