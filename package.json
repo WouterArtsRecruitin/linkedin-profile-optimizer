@@ -1,0 +1,8 @@
+{
+  "name": "profielanalyse-netlify",
+  "version": "1.0.0",
+  "description": "Netlify site for profielanalyse.nl",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}
