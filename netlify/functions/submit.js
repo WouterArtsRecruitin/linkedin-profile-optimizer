@@ -1,143 +1,196 @@
-const { createClient } = require('@supabase/supabase-js');
+/**
+ * ProfielScore Form Submission Handler
+ * Netlify Serverless Function
+ *
+ * Flow:
+ * 1. Receive form data (LinkedIn URL, email, name, goal)
+ * 2. Save to Supabase (profielscore_leads table)
+ * 3. Add to Lemlist campaign
+ * 4. Return success
+ */
 
-exports.handler = async (event, context) => {
-  // Only accept POST
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+const https = require('https');
+
+// Environment variables
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const LEMLIST_API_KEY = process.env.LEMLIST_API_KEY;
+const LEMLIST_CAMPAIGN_ID = process.env.LEMLIST_CAMPAIGN_ID;
+
+/**
+ * Make HTTPS request
+ */
+function makeRequest(hostname, method, path, headers, body = null) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname,
+      port: 443,
+      path,
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          resolve({ status: res.statusCode, body: JSON.parse(data) });
+        } catch {
+          resolve({ status: res.statusCode, body: data });
+        }
+      });
+    });
+
+    req.on('error', reject);
+    if (body) req.write(JSON.stringify(body));
+    req.end();
+  });
+}
+
+/**
+ * Validate LinkedIn URL
+ */
+function validateLinkedInUrl(url) {
+  const regex = /linkedin\.com\/(in|pub)\/[a-zA-Z0-9\-_%.]+/;
+  return regex.test(url);
+}
+
+/**
+ * Validate email
+ */
+function validateEmail(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+/**
+ * Save to Supabase
+ */
+async function saveToSupabase(formData) {
+  const { linkedin_url, email, voornaam, achternaam, telefoonnummer, doel } = formData;
+
+  const supabaseRes = await makeRequest(
+    'vrzwupnqwodqdtnmtwse.supabase.co',
+    'POST',
+    '/rest/v1/profielscore_leads',
+    {
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=minimal'
+    },
+    {
+      linkedin_url,
+      email,
+      first_name: voornaam || null,
+      last_name: achternaam || null,
+      phone: telefoonnummer || null,
+      goal: doel,
+      source: 'profielscore-landing',
+      created_at: new Date().toISOString()
+    }
+  );
+
+  if (supabaseRes.status !== 200 && supabaseRes.status !== 201) {
+    throw new Error(`Supabase error: ${supabaseRes.status} - ${JSON.stringify(supabaseRes.body)}`);
   }
 
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
+  console.log('✅ Saved to Supabase');
+}
+
+/**
+ * Add to Lemlist Campaign
+ */
+async function addToLemlistCampaign(formData) {
+  const { email, voornaam } = formData;
+
+  if (!LEMLIST_CAMPAIGN_ID) {
+    console.warn('⚠️  LEMLIST_CAMPAIGN_ID not set, skipping Lemlist');
+    return;
+  }
+
+  const lemlistRes = await makeRequest(
+    'api.lemlist.com',
+    'POST',
+    `/v1/campaigns/${LEMLIST_CAMPAIGN_ID}/leads`,
+    {
+      'X-API-Key': LEMLIST_API_KEY
+    },
+    {
+      email,
+      firstName: voornaam || ''
+    }
+  );
+
+  if (lemlistRes.status === 400 && lemlistRes.body.error?.includes('already')) {
+    console.warn('⚠️  Lead already in campaign');
+    return;
+  }
+
+  if (lemlistRes.status !== 200 && lemlistRes.status !== 201) {
+    console.warn(`⚠️  Lemlist error: ${lemlistRes.status}`, lemlistRes.body);
+    return;
+  }
+
+  console.log('✅ Added to Lemlist campaign');
+}
+
+/**
+ * Main handler
+ */
+exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
     return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      },
-      body: ''
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
 
   try {
-    const { linkedin_url, email, voornaam, achternaam, telefoonnummer, doel, source } = JSON.parse(event.body);
+    const formData = JSON.parse(event.body);
+    const { linkedin_url, email, voornaam, achternaam, telefoonnummer, doel } = formData;
 
-    // Validation
-    if (!linkedin_url || !email || !doel) {
+    if (!linkedin_url || !email) {
       return {
         statusCode: 400,
-        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'LinkedIn URL, email en doel zijn verplicht' })
+        body: JSON.stringify({ error: 'Missing required fields' })
       };
     }
 
-    // LinkedIn URL validation regex
-    const linkedinRegex = /linkedin\.com\/(in|pub)\/[a-zA-Z0-9\-_%.]+/;
-    if (!linkedinRegex.test(linkedin_url)) {
+    if (!validateLinkedInUrl(linkedin_url)) {
       return {
         statusCode: 400,
-        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Ongeldige LinkedIn URL' })
+        body: JSON.stringify({ error: 'Invalid LinkedIn URL' })
       };
     }
 
-    // Email validation regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!validateEmail(email)) {
       return {
         statusCode: 400,
-        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Ongeldig email adres' })
+        body: JSON.stringify({ error: 'Invalid email address' })
       };
     }
 
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Content-Type': 'application/json'
-    };
+    console.log(`📨 Processing submission: ${email}`);
 
-    // 1. Insert to Supabase
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Supabase credentials not configured');
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Server configuration error' })
-      };
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    await supabase.from('profielscore_leads').upsert(
-      {
-        linkedin_url,
-        email,
-        voornaam: voornaam || null,
-        achternaam: achternaam || null,
-        telefoonnummer: telefoonnummer || null,
-        doel,
-        status: 'nieuw',
-        source: source || 'profielscore-landing',
-        created_at: new Date().toISOString()
-      },
-      { onConflict: 'email' }
-    );
-
-    // 2. Add to Lemlist
-    const lemlistApiKey = process.env.LEMLIST_API_KEY;
-    if (!lemlistApiKey) {
-      console.warn('LEMLIST_API_KEY not configured - skipping Lemlist');
-    } else {
-      try {
-        const lemlistRes = await fetch(
-          'https://api.lemlist.com/api/campaigns/cam_profielscore/leads',
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${lemlistApiKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              email,
-              firstName: voornaam || '',
-              lastName: achternaam || '',
-              phone: telefoonnummer || '',
-              customFields: {
-                doel: doel
-              }
-            })
-          }
-        );
-
-        if (!lemlistRes.ok) {
-          const error = await lemlistRes.json();
-          console.error('Lemlist error:', error);
-        }
-      } catch (lemlistErr) {
-        console.error('Lemlist connection error:', lemlistErr);
-        // Don't fail the whole request if Lemlist fails
-      }
-    }
+    await saveToSupabase(formData);
+    await addToLemlistCampaign(formData);
 
     return {
       statusCode: 200,
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         success: true,
-        message: 'Aanvraag ontvangen. Rapport volgt binnen 24 uur.'
+        message: 'Submission received. You will receive an email within 24 hours.'
       })
     };
+
   } catch (err) {
-    console.error('Form submission error:', err);
+    console.error('❌ Error:', err);
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ error: 'Er ging iets mis. Probeer het opnieuw.' })
+      body: JSON.stringify({ error: 'Server error: ' + err.message })
     };
   }
 };

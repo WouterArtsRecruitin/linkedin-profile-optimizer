@@ -1,10 +1,14 @@
+# Netlify Configuration
+
 [build]
-  publish = "landing"
-  functions = "netlify/functions"
-  command = "echo 'Static site - no build needed'"
+  command = "echo 'Static site - no build step needed'"
+  publish = "."
 
-[build.environment]
-  NODE_VERSION = "18"
-
+# Function configuration
 [functions]
   node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
