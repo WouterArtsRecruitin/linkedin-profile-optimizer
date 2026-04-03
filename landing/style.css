@@ -274,12 +274,82 @@ h2 {
     display: none;
 }
 
+/* ============ SCORE CARD ============ */
 .score-card {
-    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    text-align: center;
 }
 
-.hero-visual {
-    display: none;
+.score-header {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.score-ring-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.score-svg {
+    width: 140px;
+    height: 140px;
+}
+
+.score-value {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-num {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--orange);
+    font-family: 'Outfit', sans-serif;
+}
+
+.score-label {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.score-bars {
+    text-align: left;
+}
+
+.bar-row {
+    margin-bottom: 16px;
+}
+
+.bar-row span {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.bar {
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    background: linear-gradient(90deg, var(--orange), var(--magenta));
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s var(--ease);
 }
 
 /* ============ TRUST SECTION ============ */
@@ -497,9 +567,91 @@ h2 {
     opacity: 0.5;
 }
 
+/* ============ BENEFITS ============ */
+.benefits {
+    padding: 80px 0;
+    background: var(--bg);
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+.benefit {
+    background: var(--surface);
+    padding: 40px 32px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+}
+
+.benefit::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--magenta);
+}
+
+.benefit h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 20px;
+    margin-bottom: 12px;
+}
+
+.benefit p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* ============ RAPPORT SECTION ============ */
+.rapport-section {
+    padding: 80px 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.rapport-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.rapport-text h2 {
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.rapport-text .label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.rapport-text p {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
 /* ============ HIDDEN SECTIONS ============ */
 .steps-strip,
-.benefits,
 .preview-section,
 .final-cta,
 .faq {
@@ -511,6 +663,11 @@ h2 {
     h1 {
         font-size: 36px;
         margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 36px;
+        margin-bottom: 32px;
     }
 
     .hero {
@@ -525,6 +682,15 @@ h2 {
     .form-row input,
     .btn-primary {
         width: 100%;
+    }
+
+    .benefits-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rapport-inner {
+        grid-template-columns: 1fr;
+        gap: 40px;
     }
 
     .reviews-grid {
