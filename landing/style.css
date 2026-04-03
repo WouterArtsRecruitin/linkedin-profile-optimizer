@@ -648,19 +648,7 @@ h2 {
     border-bottom: 1px solid var(--border);
 }
 
-.rapport-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-}
-
-.rapport-text h2 {
-    text-align: left;
-    margin-bottom: 16px;
-}
-
-.rapport-text .label {
+.rapport-section .label {
     display: block;
     font-size: 12px;
     letter-spacing: 2px;
@@ -670,10 +658,92 @@ h2 {
     margin-bottom: 8px;
 }
 
-.rapport-text p {
-    font-size: 18px;
+.rapport-section h2 {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.rapport-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 48px;
+}
+
+.rapport-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    text-align: center;
+    transition: all 0.3s var(--ease);
+}
+
+.rapport-card:hover {
+    border-color: var(--magenta);
+    box-shadow: 0 0 24px var(--magenta-glow);
+}
+
+.rapport-label {
+    display: inline-block;
+    background: rgba(239, 125, 0, 0.2);
+    color: var(--orange);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.rapport-label-after {
+    background: linear-gradient(90deg, rgba(255,85,0,0.2), rgba(255,0,204,0.2));
+    color: var(--magenta);
+}
+
+.rapport-content {
+    padding: 20px 0;
+}
+
+.score-big {
+    font-family: 'Outfit', sans-serif;
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--orange);
+    margin-bottom: 12px;
+}
+
+.score-big.gradient {
+    background: linear-gradient(90deg, var(--orange), var(--magenta));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.score-subtext {
+    font-size: 14px;
     color: var(--muted);
-    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+.issues-list,
+.wins-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.issue-item,
+.win-item {
+    font-size: 14px;
+    color: var(--text);
+}
+
+.win-item {
+    color: var(--text);
 }
 
 /* ============ HIDDEN SECTIONS ============ */
@@ -709,9 +779,9 @@ h2 {
         grid-template-columns: 1fr;
     }
 
-    .rapport-inner {
+    .rapport-comparison {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 24px;
     }
 
     .reviews-grid {

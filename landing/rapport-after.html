@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport NA Optimalisatie</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f5f3f0;
+            padding: 20px;
+        }
+
+        .rapport {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .label-after {
+            background: linear-gradient(90deg, #FF5500, #ff00cc);
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .rapport-header {
+            background: linear-gradient(135deg, #FF5500 0%, #ff00cc 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .rapport-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .rapport-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .rapport-body {
+            padding: 32px;
+        }
+
+        .score-ring {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 24px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-ring svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .score-value {
+            position: absolute;
+            text-align: center;
+        }
+
+        .score-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #FF5500, #ff00cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #7a7290;
+        }
+
+        .score-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .score-item {
+            background: linear-gradient(135deg, rgba(255,85,0,0.1) 0%, rgba(255,0,204,0.05) 100%);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255,85,0,0.2);
+        }
+
+        .score-item-label {
+            font-size: 12px;
+            color: #7a7290;
+            margin-bottom: 4px;
+        }
+
+        .score-item-score {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: #FF5500;
+        }
+
+        .improvements {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #f0e8e0;
+        }
+
+        .improvement {
+            font-size: 13px;
+            color: #7a7290;
+            margin-bottom: 12px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .improvement::before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+        }
+
+        .rapport-footer {
+            background: linear-gradient(135deg, rgba(255,85,0,0.08) 0%, rgba(255,0,204,0.05) 100%);
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #f0e8e0;
+        }
+
+        .rapport-footer p {
+            font-size: 12px;
+            color: #7a7290;
+            margin-bottom: 8px;
+        }
+
+        .improvement-badge {
+            display: inline-block;
+            background: #FF5500;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="rapport">
+        <div class="label-after">NA OPTIMALISATIE ⬆️</div>
+
+        <div class="rapport-header">
+            <h1>Je Score: 87</h1>
+            <p>Uitstekend LinkedIn profiel</p>
+        </div>
+
+        <div class="rapport-body">
+            <div class="score-ring">
+                <svg viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="58" stroke="#f0e8e0" stroke-width="10" fill="none" />
+                    <circle cx="70" cy="70" r="58" stroke="url(#gradient)" stroke-width="10" fill="none"
+                        stroke-dasharray="364" stroke-dashoffset="50" stroke-linecap="round"
+                        transform="rotate(-90 70 70)" />
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF5500;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#ff00cc;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="score-value">
+                    <div class="score-number">87</div>
+                    <div class="score-label">/ 100</div>
+                </div>
+            </div>
+
+            <div class="score-items">
+                <div class="score-item">
+                    <div class="score-item-label">Headline</div>
+                    <div class="score-item-score">89</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-item-label">About</div>
+                    <div class="score-item-score">85</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-item-label">SEO</div>
+                    <div class="score-item-score">92</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-item-label">Banner</div>
+                    <div class="score-item-score">78</div>
+                </div>
+            </div>
+
+            <div class="improvements">
+                <div class="improvement">Headline is specifiek & keyword-rich</div>
+                <div class="improvement">About sectie volledig ingevuld</div>
+                <div class="improvement">Professionele banner geactiveerd</div>
+                <div class="improvement">SEO-geoptimaliseerd voor recruiters</div>
+                <div class="improvement-badge">+45% meer profielweergaven</div>
+            </div>
+        </div>
+
+        <div class="rapport-footer">
+            <p>Gefeliciteerd! Jouw profiel is nu voluit zichtbaar voor recruiters.</p>
+        </div>
+    </div>
+</body>
+</html>
