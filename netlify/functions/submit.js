@@ -104,33 +104,37 @@ async function saveToSupabase(formData) {
  * Add to Lemlist Campaign
  */
 async function addToLemlistCampaign(formData) {
-  const { email, voornaam } = formData;
+  const { email, voornaam, achternaam } = formData;
 
-  if (!LEMLIST_CAMPAIGN_ID) {
-    console.warn('⚠️  LEMLIST_CAMPAIGN_ID not set, skipping Lemlist');
+  if (!LEMLIST_CAMPAIGN_ID || !LEMLIST_API_KEY) {
+    console.warn('⚠️  LEMLIST config missing, skipping');
     return;
   }
+
+  // Lemlist uses Basic Auth: base64(':apiKey')
+  const basicAuth = Buffer.from(`:${LEMLIST_API_KEY}`).toString('base64');
 
   const lemlistRes = await makeRequest(
     'api.lemlist.com',
     'POST',
-    `/v1/campaigns/${LEMLIST_CAMPAIGN_ID}/leads`,
+    `/api/campaigns/${LEMLIST_CAMPAIGN_ID}/leads/`,
     {
-      'X-API-Key': LEMLIST_API_KEY
+      'Authorization': `Basic ${basicAuth}`
     },
     {
       email,
-      firstName: voornaam || ''
+      firstName: voornaam || '',
+      lastName: achternaam || ''
     }
   );
 
-  if (lemlistRes.status === 400 && lemlistRes.body.error?.includes('already')) {
-    console.warn('⚠️  Lead already in campaign');
+  if (lemlistRes.status === 409) {
+    console.warn('⚠️  Lead already in Lemlist campaign');
     return;
   }
 
   if (lemlistRes.status !== 200 && lemlistRes.status !== 201) {
-    console.warn(`⚠️  Lemlist error: ${lemlistRes.status}`, lemlistRes.body);
+    console.warn(`⚠️  Lemlist error: ${lemlistRes.status}`, JSON.stringify(lemlistRes.body));
     return;
   }
 
