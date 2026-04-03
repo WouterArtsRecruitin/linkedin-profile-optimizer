@@ -93,14 +93,14 @@
                 <form class="hero-form" id="quickForm" onsubmit="submitForm(event)">
                     <div class="form-grid">
                         <input type="url" id="linkedin_url" name="linkedin_url"
-                            placeholder="https://linkedin.com/in/jouw-profiel" required />
-                        <input type="email" id="email" name="email" placeholder="E-mailadres" required />
-                        <input type="text" id="voornaam" name="voornaam" placeholder="Voornaam (optioneel)" />
-                        <input type="text" id="achternaam" name="achternaam" placeholder="Achternaam (optioneel)" />
-                        <input type="tel" id="telefoonnummer" name="telefoonnummer" placeholder="Telefoonnummer (optioneel)" />
+                            placeholder="LinkedIn profiel" required />
+                        <input type="email" id="email" name="email" placeholder="E-mail" required />
+                        <input type="text" id="voornaam" name="voornaam" placeholder="Voornaam" />
+                        <input type="text" id="achternaam" name="achternaam" placeholder="Achternaam" />
+                        <input type="tel" id="telefoonnummer" name="telefoonnummer" placeholder="Telefoon" />
                         <select id="doel" name="doel" required>
-                            <option value="">Welk doel staat voorop?</option>
-                            <option value="meer-profielweergaven">Meer profielweergaven</option>
+                            <option value="">Doel</option>
+                            <option value="meer-profielweergaven">Meer views</option>
                             <option value="recruiter-contact">Recruiter contact</option>
                             <option value="alles-optimaliseren">Alles optimaliseren</option>
                         </select>
@@ -199,8 +199,8 @@
         </div>
     </section>
 
-    <!-- ========== RAPPORT SECTION ========== -->
-    <section class="rapport-section">
+    <!-- ========== RAPPORT SECTION (HIDDEN FROM HERO) ========== -->
+    <section class="rapport-section" style="display:none;">
         <div class="container">
             <span class="label">JE RAPPORT</span>
             <h2>Alles wat je nodig hebt in één PDF</h2>
