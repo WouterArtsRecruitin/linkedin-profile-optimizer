@@ -124,8 +124,15 @@
                         </button>
                     </div>
 
-                    <p class="form-disclaimer" id="disclaimer">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.
-                        Gegevens worden na 30 dagen verwijderd.</p>
+                    <div class="form-disclaimer" id="disclaimer">
+                        <p><strong>⚠️ Privacy & Gebruiksvoorwaarden:</strong></p>
+                        <ul style="margin: 8px 0 0 0; padding-left: 16px; font-size: 13px; line-height: 1.5;">
+                            <li>Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a> en <a href="#">gebruiksvoorwaarden</a></li>
+                            <li>Je LinkedIn profiel wordt publiekelijk gescand (geen inloggegevens nodig)</li>
+                            <li>Je gegevens worden na 30 dagen automatisch verwijderd</li>
+                            <li><strong>Maximaal 1 analyse per 6 maanden per e-mailadres</strong></li>
+                        </ul>
+                    </div>
                 </form>
                 <p class="form-error" id="formError" style="display:none; color: #FF5500; font-size: 14px; margin-top: 8px;"></p>
 
@@ -461,6 +468,36 @@
             document.getElementById('email').focus();
         }
 
+        // Check if email has been submitted in last 6 months
+        function checkSubmissionLimit(email) {
+            const submissions = JSON.parse(localStorage.getItem('profielscore_submissions') || '{}');
+            const lastSubmission = submissions[email];
+
+            if (lastSubmission) {
+                const lastDate = new Date(lastSubmission);
+                const now = new Date();
+                const daysSince = (now - lastDate) / (1000 * 60 * 60 * 24);
+                const monthsSince = daysSince / 30.44;
+
+                if (monthsSince < 6) {
+                    const daysLeft = Math.ceil((6 * 30.44) - daysSince);
+                    return {
+                        allowed: false,
+                        message: `Je hebt je profiel al gescand op ${lastDate.toLocaleDateString('nl-NL')}. Je kunt weer over ${daysLeft} dagen een nieuwe analyse aanvragen.`
+                    };
+                }
+            }
+
+            return { allowed: true };
+        }
+
+        // Record submission in localStorage
+        function recordSubmission(email) {
+            const submissions = JSON.parse(localStorage.getItem('profielscore_submissions') || '{}');
+            submissions[email] = new Date().toISOString();
+            localStorage.setItem('profielscore_submissions', JSON.stringify(submissions));
+        }
+
         async function submitForm(e) {
             e.preventDefault();
             const linkedin_url = document.getElementById('linkedin_url').value;
@@ -492,6 +529,14 @@
                 return;
             }
 
+            // Check 6-month submission limit
+            const limitCheck = checkSubmissionLimit(email);
+            if (!limitCheck.allowed) {
+                errorEl.textContent = '⏳ ' + limitCheck.message;
+                errorEl.style.display = 'block';
+                return;
+            }
+
             btn.textContent = 'Bezig met versturen...';
             btn.disabled = true;
             btn.style.opacity = '0.7';
@@ -519,6 +564,9 @@
                     console.error('Form submission error:', result);
                     return;
                 }
+
+                // Record submission timestamp for 6-month limit
+                recordSubmission(email);
 
                 document.getElementById('confirmEmail').textContent = email;
                 document.getElementById('successModal').classList.add('active');
