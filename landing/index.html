@@ -84,33 +84,48 @@
     <!-- ========== HERO ========== -->
     <section class="hero">
         <div class="hero-overlay"></div>
+        <div class="hero-blob"></div>
         <div class="container hero-inner">
             <div class="hero-content">
-                <h1>Weet je score.<br><span class="highlight">Optimaliseer je profiel.</span></h1>
-                <p class="hero-sub">Gratis analyse met score, verbeterde teksten en professionele banner. Binnen 24 uur in je inbox.</p>
+                <h1>Recruiters scrollen voorbij jou.<br><span class="highlight">Nog niet.</span></h1>
+                <p class="hero-sub">Krijg gratis je LinkedIn ProfielScore — en zie precies wat je mist.</p>
 
-                <!-- Custom form -->
+                <!-- 2-Step Form -->
                 <form class="hero-form" id="quickForm" onsubmit="submitForm(event)">
-                    <div class="form-grid">
-                        <input type="url" id="linkedin_url" name="linkedin_url"
-                            placeholder="LinkedIn profiel" required />
-                        <input type="email" id="email" name="email" placeholder="E-mail" required />
-                        <input type="text" id="voornaam" name="voornaam" placeholder="Voornaam" />
-                        <input type="text" id="achternaam" name="achternaam" placeholder="Achternaam" />
-                        <input type="tel" id="telefoonnummer" name="telefoonnummer" placeholder="Telefoon" />
-                        <select id="doel" name="doel" required>
-                            <option value="">Doel</option>
-                            <option value="meer-profielweergaven">Meer views</option>
-                            <option value="recruiter-contact">Recruiter contact</option>
-                            <option value="alles-optimaliseren">Alles optimaliseren</option>
-                        </select>
+                    <!-- Step 1: LinkedIn URL only -->
+                    <div class="form-step-1" id="formStep1">
+                        <div class="form-row-single">
+                            <input type="url" id="linkedin_url" name="linkedin_url"
+                                placeholder="linkedin.com/in/jouw-naam" required />
+                            <button type="button" class="btn-primary" id="nextStepBtn" onclick="validateAndNextStep()">
+                                Analyseer gratis →
+                            </button>
+                        </div>
+                        <p class="micro-trust">Geen account. Geen software. Gratis.</p>
                     </div>
-                    <button type="submit" class="btn-primary" id="submitBtn">
-                        Ontvang mijn rapport →
-                    </button>
-                    <p class="form-disclaimer">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.
+
+                    <!-- Step 2: Expanded form (hidden initially) -->
+                    <div class="form-step-2" id="formStep2" style="display:none">
+                        <div class="form-grid">
+                            <input type="email" id="email" name="email" placeholder="E-mail" required />
+                            <div class="optional-divider">Optioneel — voor een persoonlijkere analyse</div>
+                            <input type="text" id="voornaam" name="voornaam" placeholder="Voornaam" />
+                            <input type="text" id="achternaam" name="achternaam" placeholder="Achternaam" />
+                            <input type="tel" id="telefoonnummer" name="telefoonnummer" placeholder="Telefoon" />
+                            <select id="doel" name="doel">
+                                <option value="">Doel (optioneel)</option>
+                                <option value="meer-profielweergaven">Meer views</option>
+                                <option value="recruiter-contact">Recruiter contact</option>
+                                <option value="alles-optimaliseren">Alles optimaliseren</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary" id="submitBtn">
+                            Verstuur mijn analyse →
+                        </button>
+                    </div>
+
+                    <p class="form-disclaimer" id="disclaimer">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.
                         Gegevens worden na 30 dagen verwijderd.</p>
-                    <p class="trust-strip">Gratis · Geen installatie · Binnen 24u</p>
                 </form>
                 <p class="form-error" id="formError" style="display:none; color: #FF5500; font-size: 14px; margin-top: 8px;"></p>
 
@@ -178,24 +193,98 @@
         </div>
     </section>
 
+    <!-- ========== STATS STRIP ========== -->
+    <section class="stats-strip">
+        <div class="container stats-inner">
+            <div class="stat-item"><strong>2.400+</strong><span>analyses uitgevoerd</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><strong>4.8★</strong><span>gemiddelde beoordeling</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><strong>+47%</strong><span>meer profielweergaven</span></div>
+        </div>
+    </section>
+
+    <!-- ========== RAPPORT SECTION ========== -->
+    <section class="rapport-section">
+        <div class="container">
+            <span class="label">JE RAPPORT</span>
+            <h2>Alles wat je nodig hebt in één PDF</h2>
+
+            <div class="rapport-comparison">
+                <div class="rapport-card rapport-before">
+                    <div class="rapport-label">VOOR</div>
+                    <div class="rapport-content">
+                        <div class="score-big">42</div>
+                        <p class="score-subtext">Veel ruimte voor verbetering</p>
+                        <div class="issues-list">
+                            <div class="issue-item">⚠️ Generieke headline</div>
+                            <div class="issue-item">⚠️ Lege About sectie</div>
+                            <div class="issue-item">⚠️ Geen banner</div>
+                            <div class="issue-item">⚠️ Weinig keywords</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rapport-card rapport-after">
+                    <div class="rapport-label rapport-label-after">NA</div>
+                    <div class="rapport-content">
+                        <div class="score-big gradient">87</div>
+                        <p class="score-subtext">Uitstekend LinkedIn profiel</p>
+                        <div class="wins-list">
+                            <div class="win-item">✅ Keyword-rich headline</div>
+                            <div class="win-item">✅ Volledige About</div>
+                            <div class="win-item">✅ Professionele banner</div>
+                            <div class="win-item">✅ +45% meer views</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ========== BENEFITS ========== -->
     <section class="benefits">
         <div class="container">
-            <h2>Alles in één <span class="highlight">rapport</span></h2>
+            <h2>Drie dingen die <span class="highlight">veranderen</span></h2>
             <div class="benefits-grid">
                 <div class="benefit">
-                    <h3>Profiel Score</h3>
-                    <p>Je exacte score op alle criteria.</p>
+                    <h3>Zie waarom je gemist wordt</h3>
+                    <p>Je score laat per onderdeel zien wat recruiters zien — en waarom ze niet klikken.</p>
                 </div>
                 <div class="benefit">
-                    <h3>Herschreven Teksten</h3>
-                    <p>Headline & About kant-en-klaar.</p>
+                    <h3>Ontvang teksten die wél werken</h3>
+                    <p>Headline & About herschreven door AI, klaar om te plakken.</p>
                 </div>
                 <div class="benefit">
-                    <h3>Banner & Keywords</h3>
-                    <p>Professionele banner + SEO tips.</p>
+                    <h3>Val op in elke zoekopdracht</h3>
+                    <p>Geoptimaliseerde keywords + professionele banner. Meer zichtbaarheid, meer contact.</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ========== HOE WERKT HET ========== -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>Hoe werkt het?</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Plak je LinkedIn URL</h3>
+                    <p>Geen wachtwoord, geen toegang tot je account. Alleen je publieke URL.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>AI analyseert je profiel</h3>
+                    <p>Vergeleken met duizenden geoptimaliseerde voorbeelden en berekent je score.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Ontvang je rapport</h3>
+                    <p>Binnen minuten in je inbox: je score, verbeterpunten en herschreven teksten.</p>
+                </div>
+            </div>
+            <p class="how-it-works-privacy">We koppelen nooit in op je LinkedIn account. Je gegevens worden na analyse niet opgeslagen.</p>
         </div>
     </section>
 
@@ -278,6 +367,16 @@
         </div>
     </section>
 
+    <!-- ========== SECOND CTA ========== -->
+    <section class="second-cta">
+        <div class="container">
+            <h2>Klaar om meer recruiter contact te krijgen?</h2>
+            <p>Gratis. In 60 seconden. Geen software nodig.</p>
+            <button class="btn-primary" onclick="scrollToForm()">Analyseer mijn profiel nu →</button>
+            <p class="micro-trust">Geen account. Geen software. Geen spam. Gratis.</p>
+        </div>
+    </section>
+
 <!-- Footer -->
     <footer class="footer">
         <div class="container footer-inner">
@@ -312,7 +411,7 @@
     <script>
         function scrollToForm() {
             document.getElementById('linkedin_url').focus();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: document.querySelector('.hero-form').offsetTop - 100, behavior: 'smooth' });
         }
 
         // LinkedIn URL validation
@@ -325,6 +424,41 @@
         function validateEmail(email) {
           const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           return regex.test(email);
+        }
+
+        // 2-Step Form: Validate URL & move to step 2
+        function validateAndNextStep() {
+            const url = document.getElementById('linkedin_url').value;
+            const errorEl = document.getElementById('formError');
+
+            if (!errorEl) {
+                const form = document.getElementById('quickForm');
+                const p = document.createElement('p');
+                p.id = 'formError';
+                p.style.color = '#FF5500';
+                p.style.fontSize = '14px';
+                p.style.marginTop = '8px';
+                form.appendChild(p);
+            }
+            const errEl = document.getElementById('formError');
+            errEl.style.display = 'none';
+
+            if (!url) {
+                errEl.textContent = '⚠️ Voer je LinkedIn URL in.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (!validateLinkedInUrl(url)) {
+                errEl.textContent = '⚠️ Dit lijkt geen geldige LinkedIn profiel-URL.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            // Valid URL: hide step 1, show step 2
+            document.getElementById('formStep1').style.display = 'none';
+            document.getElementById('formStep2').style.display = 'block';
+            document.getElementById('email').focus();
         }
 
         async function submitForm(e) {
