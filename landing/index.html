@@ -511,8 +511,8 @@
             errorEl.style.display = 'none';
 
             // Client-side validation
-            if (!linkedin_url || !email || !doel) {
-                errorEl.textContent = '⚠️ Vul LinkedIn URL, email en doel in.';
+            if (!linkedin_url || !email) {
+                errorEl.textContent = '⚠️ Vul je LinkedIn URL en email in.';
                 errorEl.style.display = 'block';
                 return;
             }
