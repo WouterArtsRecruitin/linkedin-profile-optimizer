@@ -302,6 +302,7 @@ h2 {
 
 /* ============ SCORE CARD ============ */
 .score-card {
+    display: none;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
