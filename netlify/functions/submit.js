@@ -56,9 +56,9 @@ exports.handler = async (event, context) => {
     };
 
     // 1. Submit to Jotform (server-side, API key hidden)
-    const jotformApiKey = process.env.JOTFORM_API_KEY;
+    const jotformApiKey = process.env.JOTFORM_API_TOKEN || process.env.JOTFORM_API_KEY;
     if (!jotformApiKey) {
-      console.error('JOTFORM_API_KEY environment variable not set');
+      console.error('JOTFORM_API_TOKEN environment variable not set');
       return {
         statusCode: 500,
         headers,
