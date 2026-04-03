@@ -88,16 +88,25 @@
                 <h1>Verbeter je LinkedIn profiel.<br><span class="highlight">Genereer meer leads.</span></h1>
                 <p class="hero-sub">Ontvang een gratis rapport met je score en herschreven teksten. <strong>Binnen 24u.</strong></p>
 
-                <!-- Inline form -->
+                <!-- Custom form -->
                 <form class="hero-form" id="quickForm" onsubmit="submitForm(event)">
-                    <div class="form-row">
+                    <div class="form-grid">
                         <input type="url" id="linkedin_url" name="linkedin_url"
                             placeholder="https://linkedin.com/in/jouw-profiel" required />
-                        <input type="email" id="email" name="email" placeholder="naam@bedrijf.nl" required />
-                        <button type="submit" class="btn-primary" id="submitBtn">
-                            Ontvang mijn rapport →
-                        </button>
+                        <input type="email" id="email" name="email" placeholder="E-mailadres" required />
+                        <input type="text" id="voornaam" name="voornaam" placeholder="Voornaam (optioneel)" />
+                        <input type="text" id="achternaam" name="achternaam" placeholder="Achternaam (optioneel)" />
+                        <input type="tel" id="telefoonnummer" name="telefoonnummer" placeholder="Telefoonnummer (optioneel)" />
+                        <select id="doel" name="doel" required>
+                            <option value="">Welk doel staat voorop?</option>
+                            <option value="meer-profielweergaven">Meer profielweergaven</option>
+                            <option value="recruiter-contact">Recruiter contact</option>
+                            <option value="alles-optimaliseren">Alles optimaliseren</option>
+                        </select>
                     </div>
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        Ontvang mijn rapport →
+                    </button>
                     <p class="form-disclaimer">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.
                         Gegevens worden na 30 dagen verwijderd.</p>
                     <p class="trust-strip">Gratis · Geen installatie · Binnen 24u</p>
@@ -330,20 +339,24 @@
 
         async function submitForm(e) {
             e.preventDefault();
-            const url = document.getElementById('linkedin_url').value;
+            const linkedin_url = document.getElementById('linkedin_url').value;
             const email = document.getElementById('email').value;
+            const voornaam = document.getElementById('voornaam').value;
+            const achternaam = document.getElementById('achternaam').value;
+            const telefoonnummer = document.getElementById('telefoonnummer').value;
+            const doel = document.getElementById('doel').value;
             const btn = document.getElementById('submitBtn');
             const errorEl = document.getElementById('formError');
             errorEl.style.display = 'none';
 
             // Client-side validation
-            if (!url || !email) {
-                errorEl.textContent = '⚠️ Vul alstublieft beide velden in.';
+            if (!linkedin_url || !email || !doel) {
+                errorEl.textContent = '⚠️ Vul LinkedIn URL, email en doel in.';
                 errorEl.style.display = 'block';
                 return;
             }
 
-            if (!validateLinkedInUrl(url)) {
+            if (!validateLinkedInUrl(linkedin_url)) {
                 errorEl.textContent = '⚠️ Dit lijkt geen geldige LinkedIn profiel-URL.';
                 errorEl.style.display = 'block';
                 return;
@@ -363,7 +376,15 @@
                 const response = await fetch('/.netlify/functions/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ linkedin_url: url, email })
+                    body: JSON.stringify({
+                        linkedin_url,
+                        email,
+                        voornaam: voornaam || null,
+                        achternaam: achternaam || null,
+                        telefoonnummer: telefoonnummer || null,
+                        doel,
+                        source: 'profielscore-landing'
+                    })
                 });
 
                 const result = await response.json();
@@ -380,7 +401,6 @@
                 e.target.reset();
 
                 // ── Tracking: Conversie events ──
-                // GA4
                 if (typeof gtag === 'function') {
                     gtag('event', 'generate_lead', {
                         event_category: 'linkedin_optimizer',
@@ -388,14 +408,12 @@
                         value: 1
                     });
                 }
-                // Facebook Pixel
                 if (typeof fbq === 'function') {
                     fbq('track', 'Lead', {
                         content_name: 'LinkedIn Profiel Analyse',
                         content_category: 'linkedin_optimizer'
                     });
                 }
-                // LinkedIn Insight Tag
                 if (typeof lintrk === 'function') {
                     lintrk('track', { conversion_id: 0 });
                 }
