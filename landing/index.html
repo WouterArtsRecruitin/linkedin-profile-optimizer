@@ -119,78 +119,10 @@
                         </button>
                     </div>
 
-                    <div class="form-disclaimer" id="disclaimer">
-                        <p><strong>⚠️ Privacy & Gebruiksvoorwaarden:</strong></p>
-                        <ul style="margin: 8px 0 0 0; padding-left: 16px; font-size: 13px; line-height: 1.5;">
-                            <li>Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a> en <a href="#">gebruiksvoorwaarden</a></li>
-                            <li>Je LinkedIn profiel wordt publiekelijk gescand (geen inloggegevens nodig)</li>
-                            <li>Je gegevens worden na 30 dagen automatisch verwijderd</li>
-                            <li><strong>Maximaal 1 analyse per 6 maanden per e-mailadres</strong></li>
-                        </ul>
-                    </div>
+                    <p class="form-privacy-line">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.</p>
                 </form>
                 <p class="form-error" id="formError" style="display:none; color: #FF5500; font-size: 14px; margin-top: 8px;"></p>
 
-                <div class="hero-stats">
-                    <div class="stat">
-                        <strong>127</strong>
-                        <span>profielen geanalyseerd</span>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat">
-                        <strong>
-                            &lt; 24u</strong>
-                                <span>levertijd rapport</span>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat">
-                        <strong>+68%</strong>
-                        <span>meer profielweergaven</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Score mockup -->
-            <div class="hero-visual">
-                <div class="score-card">
-                    <div class="score-header">LinkedIn Profiel Score</div>
-                    <div class="score-ring-wrap">
-                        <svg viewBox="0 0 140 140" class="score-svg">
-                            <circle cx="70" cy="70" r="58" stroke="rgba(255,255,255,0.1)" stroke-width="10"
-                                fill="none" />
-                            <circle cx="70" cy="70" r="58" stroke="#ef7d00" stroke-width="10" fill="none"
-                                stroke-dasharray="364" stroke-dashoffset="110" stroke-linecap="round"
-                                transform="rotate(-90 70 70)" class="score-progress" />
-                        </svg>
-                        <div class="score-value">
-                            <span class="score-num" id="scoreNum">?</span>
-                            <span class="score-label">/ 100</span>
-                        </div>
-                    </div>
-                    <div class="score-bars">
-                        <div class="bar-row"><span>Headline</span>
-                            <div class="bar">
-                                <div class="bar-fill" style="width:0%" data-target="45%"></div>
-                            </div>
-                        </div>
-                        <div class="bar-row"><span>About</span>
-                            <div class="bar">
-                                <div class="bar-fill" style="width:0%" data-target="30%"></div>
-                            </div>
-                        </div>
-                        <div class="bar-row"><span>SEO Keywords</span>
-                            <div class="bar">
-                                <div class="bar-fill" style="width:0%" data-target="60%"></div>
-                            </div>
-                        </div>
-                        <div class="bar-row"><span>Banner</span>
-                            <div class="bar">
-                                <div class="bar-fill" style="width:0%" data-target="0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="score-cta">Jouw score ontdekken? ↑</div>
-                </div>
             </div>
         </div>
     </section>
@@ -290,50 +222,6 @@
         </div>
     </section>
 
-    <!-- ========== RAPPORT SECTION (HIDDEN FROM HERO) ========== -->
-    <section class="rapport-section" style="display:none;">
-        <div class="container">
-            <span class="label">JE RAPPORT</span>
-            <h2>Alles wat je nodig hebt in één PDF</h2>
-
-            <div class="rapport-comparison">
-                <div class="rapport-card rapport-before">
-                    <div class="rapport-label">VOOR</div>
-                    <div class="rapport-content">
-                        <div class="score-big">42</div>
-                        <p class="score-subtext">Veel ruimte voor verbetering</p>
-                        <div class="issues-list">
-                            <div class="issue-item">⚠️ Generieke headline</div>
-                            <div class="issue-item">⚠️ Lege About sectie</div>
-                            <div class="issue-item">⚠️ Geen banner</div>
-                            <div class="issue-item">⚠️ Weinig keywords</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rapport-card rapport-after">
-                    <div class="rapport-label rapport-label-after">NA</div>
-                    <div class="rapport-content">
-                        <div class="score-big gradient">87</div>
-                        <p class="score-subtext">Uitstekend LinkedIn profiel</p>
-                        <div class="wins-list">
-                            <div class="win-item">✅ Keyword-rich headline</div>
-                            <div class="win-item">✅ Volledige About</div>
-                            <div class="win-item">✅ Professionele banner</div>
-                            <div class="win-item">✅ +45% meer views</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========== TRUST STRIP ========== -->
-    <section class="trust-section">
-        <div class="container">
-            <p class="trust-text">Gratis · Geen installatie · Binnen 24u</p>
-        </div>
-    </section>
 
     <!-- ========== SOCIAL PROOF ========== -->
     <section class="reviews">
@@ -626,29 +514,6 @@
         }, { threshold: 0.15 });
         document.querySelectorAll('.benefit, .review, .preview-mockup').forEach(el => obs.observe(el));
 
-        // Score animation in hero
-        let scoreAnimationTriggered = false;
-        const heroObs = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && !scoreAnimationTriggered) {
-                scoreAnimationTriggered = true;
-                const el = document.getElementById('scoreNum');
-                let n = 0;
-                const iv = setInterval(() => {
-                    n += 1;
-                    el.textContent = n;
-                    if (n >= 69) { clearInterval(iv); }
-                }, 25);
-                // Animate bar fills from 0% to target values
-                entries[0].target.querySelectorAll('.bar-fill').forEach((bar) => {
-                    const target = bar.getAttribute('data-target');
-                    if (target) {
-                        bar.style.width = target;
-                    }
-                });
-            }
-        }, { threshold: 0.5 });
-        const scoreCard = document.querySelector('.score-card');
-        if (scoreCard) heroObs.observe(scoreCard);
     </script>
 </body>
 

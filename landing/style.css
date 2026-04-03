@@ -328,38 +328,19 @@ h2 {
     box-shadow: 0 8px 28px var(--orange-glow);
 }
 
-.form-disclaimer {
-    margin-top: 16px;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-    background: rgba(255,85,0,0.08);
-    border-left: 3px solid var(--orange);
-    border-radius: 4px;
-}
-
-.form-disclaimer p {
-    margin: 0;
-    font-weight: 600;
-    color: var(--orange);
-}
-
-.form-disclaimer ul {
-    list-style: disc;
-}
-
-.form-disclaimer li {
+.form-privacy-line {
+    margin-top: 12px;
+    font-size: 12px;
     color: var(--muted);
 }
 
-.form-disclaimer a {
-    color: var(--orange);
+.form-privacy-line a {
+    color: var(--muted);
     text-decoration: underline;
     transition: color 0.3s var(--ease);
 }
 
-.form-disclaimer a:hover {
+.form-privacy-line a:hover {
     color: var(--text);
 }
 
@@ -369,104 +350,6 @@ h2 {
     color: var(--orange);
 }
 
-/* ---- Hero Stats/Score (Hidden) ---- */
-.hero-stats {
-    display: none;
-}
-
-/* ============ SCORE CARD ============ */
-.score-card {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 40px 32px;
-    text-align: center;
-}
-
-.score-header {
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 24px;
-}
-
-.score-ring-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 32px;
-}
-
-.score-svg {
-    width: 140px;
-    height: 140px;
-}
-
-.score-value {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.score-num {
-    font-size: 48px;
-    font-weight: 900;
-    color: var(--orange);
-    font-family: 'Outfit', sans-serif;
-}
-
-.score-label {
-    font-size: 14px;
-    color: var(--muted);
-}
-
-.score-bars {
-    text-align: left;
-}
-
-.bar-row {
-    margin-bottom: 16px;
-}
-
-.bar-row span {
-    display: block;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 6px;
-}
-
-.bar {
-    background: rgba(255,255,255,0.05);
-    border-radius: 4px;
-    height: 8px;
-    overflow: hidden;
-}
-
-.bar-fill {
-    background: linear-gradient(90deg, var(--orange), var(--magenta));
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.8s var(--ease);
-}
-
-/* ============ TRUST SECTION ============ */
-.trust-section {
-    background: var(--bg);
-    padding: 60px 0;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-}
-
-.trust-text {
-    font-size: 14px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    font-weight: 500;
-}
 
 /* ============ REVIEWS ============ */
 .reviews {
