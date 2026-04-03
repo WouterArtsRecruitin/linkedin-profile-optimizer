@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profielscore Rapport</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f5f3f0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .rapport {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .rapport-header {
+            background: linear-gradient(135deg, #FF5500 0%, #ff00cc 100%);
+            padding: 60px 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .rapport-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .rapport-header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .rapport-body {
+            padding: 60px 40px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: #07050f;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            font-size: 32px;
+        }
+
+        /* Score Card */
+        .score-ring {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 32px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-ring svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .score-value {
+            position: absolute;
+            text-align: center;
+        }
+
+        .score-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 64px;
+            font-weight: 900;
+            color: #FF5500;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #7a7290;
+        }
+
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .score-item {
+            background: #f5f3f0;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .score-item-label {
+            font-size: 14px;
+            color: #7a7290;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .score-item-score {
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: #FF5500;
+        }
+
+        /* Recommendations */
+        .recommendation {
+            background: #f5f3f0;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #FF5500;
+        }
+
+        .recommendation h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #07050f;
+            margin-bottom: 8px;
+        }
+
+        .recommendation p {
+            font-size: 14px;
+            color: #7a7290;
+            line-height: 1.5;
+        }
+
+        /* CTA */
+        .rapport-footer {
+            background: linear-gradient(135deg, rgba(255,85,0,0.1) 0%, rgba(255,0,204,0.05) 100%);
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #f0e8e0;
+        }
+
+        .rapport-footer p {
+            font-size: 14px;
+            color: #7a7290;
+            margin-bottom: 16px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #FF5500;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #ff6b1a;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .rapport-header {
+                padding: 40px 24px;
+            }
+
+            .rapport-header h1 {
+                font-size: 32px;
+            }
+
+            .rapport-body {
+                padding: 32px 24px;
+            }
+
+            .score-breakdown {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="rapport">
+        <!-- Header -->
+        <div class="rapport-header">
+            <h1>Je LinkedIn Profiel Rapport</h1>
+            <p>Gepersonaliseerde analyse & optimalisatietips</p>
+        </div>
+
+        <!-- Body -->
+        <div class="rapport-body">
+            <!-- Score Section -->
+            <div class="section">
+                <h2><span class="section-icon">📊</span> Je Profiel Score</h2>
+                <div class="score-ring">
+                    <svg viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="90" stroke="#f0e8e0" stroke-width="12" fill="none" />
+                        <circle cx="100" cy="100" r="90" stroke="#FF5500" stroke-width="12" fill="none"
+                            stroke-dasharray="565" stroke-dashoffset="165" stroke-linecap="round"
+                            transform="rotate(-90 100 100)" />
+                    </svg>
+                    <div class="score-value">
+                        <div class="score-number">73</div>
+                        <div class="score-label">/ 100</div>
+                    </div>
+                </div>
+
+                <div class="score-breakdown">
+                    <div class="score-item">
+                        <div class="score-item-label">Headline</div>
+                        <div class="score-item-score">42</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-label">About</div>
+                        <div class="score-item-score">68</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-label">SEO Keywords</div>
+                        <div class="score-item-score">85</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-label">Banner</div>
+                        <div class="score-item-score">78</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="section">
+                <h2><span class="section-icon">💡</span> Aanbevelingen</h2>
+
+                <div class="recommendation">
+                    <h3>1. Verbeter je Headline</h3>
+                    <p>Je headline haalt een score van 42. Dit is het eerste wat recruiter zien. Voeg meer keywords en specifieke skills in.</p>
+                </div>
+
+                <div class="recommendation">
+                    <h3>2. Vul je About sectie aan</h3>
+                    <p>Je About sectie is minimaal. Recruiter willen jouw verhaal horen. Voeg 3-4 paragrafen in met je ervaring, skills en doel.</p>
+                </div>
+
+                <div class="recommendation">
+                    <h3>3. Professionele Banner</h3>
+                    <p>Een mooie, professionele banner met je naam + specialisatie verhoogt je zichtbaarheid met 68%.</p>
+                </div>
+            </div>
+
+            <!-- Herschreven Texten -->
+            <div class="section">
+                <h2><span class="section-icon">✍️</span> Herschreven Headline</h2>
+                <div class="recommendation" style="border-left-color: #ff00cc;">
+                    <p><strong>Was:</strong> "Professional at XYZ Company"</p>
+                    <p style="margin-top: 12px;"><strong>Wordt:</strong> "Senior Product Manager | SaaS Growth | Agile Leadership | B2B Strategy"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="rapport-footer">
+            <p>Dit rapport is gemaakt op basis van LinkedIn best practices en recruiter insights.</p>
+            <p style="margin-bottom: 24px; font-size: 13px;">Voor vragen of meer hulp:</p>
+            <a href="mailto:contact@profielscore.nl" class="cta-button">Stuur een bericht</a>
+        </div>
+    </div>
+</body>
+</html>
