@@ -10,7 +10,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="style.css?v=6">
@@ -18,7 +18,6 @@
     <!-- ========== TRACKING PIXELS ========== -->
 
     <!-- Google Analytics 4 (GA4) -->
-    <!-- TODO: Vervang G-W6G1NY28BD door je eigen GA4 Measurement ID -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-W6G1NY28BD"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -28,7 +27,6 @@
     </script>
 
     <!-- Facebook Pixel -->
-    <!-- TODO: Vervang 238226887541404 door je Facebook Pixel ID -->
     <script>
         !function (f, b, e, v, n, t, s) {
             if (f.fbq) return; n = f.fbq = function () {
@@ -48,7 +46,6 @@
             src="https://www.facebook.com/tr?id=238226887541404&ev=PageView&noscript=1" /></noscript>
 
     <!-- LinkedIn Insight Tag -->
-    <!-- TODO: Vervang 1830706 door je LinkedIn Partner ID -->
     <script type="text/javascript">
         _linkedin_partner_id = "1830706";
         window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
@@ -109,6 +106,7 @@
                     <p class="form-disclaimer">Door te versturen ga je akkoord met ons <a href="#">privacybeleid</a>.
                         Gegevens worden na 30 dagen verwijderd.</p>
                 </form>
+                <p class="form-error" id="formError" style="display:none; color: #ef7d00; font-size: 14px; margin-top: 8px;"></p>
 
                 <div class="hero-stats">
                     <div class="stat">
@@ -118,7 +116,7 @@
                     <div class="stat-divider"></div>
                     <div class="stat">
                         <strong>
-                            < 24u</strong>
+                            &lt; 24u</strong>
                                 <span>levertijd rapport</span>
                     </div>
                     <div class="stat-divider"></div>
@@ -149,22 +147,22 @@
                     <div class="score-bars">
                         <div class="bar-row"><span>Headline</span>
                             <div class="bar">
-                                <div class="bar-fill" style="width:45%"></div>
+                                <div class="bar-fill" style="width:0%" data-target="45%"></div>
                             </div>
                         </div>
                         <div class="bar-row"><span>About</span>
                             <div class="bar">
-                                <div class="bar-fill" style="width:30%"></div>
+                                <div class="bar-fill" style="width:0%" data-target="30%"></div>
                             </div>
                         </div>
                         <div class="bar-row"><span>SEO Keywords</span>
                             <div class="bar">
-                                <div class="bar-fill" style="width:60%"></div>
+                                <div class="bar-fill" style="width:0%" data-target="60%"></div>
                             </div>
                         </div>
                         <div class="bar-row"><span>Banner</span>
                             <div class="bar">
-                                <div class="bar-fill w0" style="width:0%"></div>
+                                <div class="bar-fill" style="width:0%" data-target="0%"></div>
                             </div>
                         </div>
                     </div>
@@ -377,7 +375,7 @@
             <div class="footer-links">
                 <a href="https://recruitin.nl">Website</a>
                 <a href="#">Privacybeleid</a>
-                <a href="https://linkedin.com/company/recruitin" target="_blank">LinkedIn</a>
+                <a href="https://linkedin.com/company/recruitin" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             </div>
             <p class="copyright">© 2026 Recruitin — Doesburg, Nederland</p>
         </div>
@@ -405,26 +403,65 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // LinkedIn URL validation
+        function validateLinkedInUrl(url) {
+          const regex = /linkedin\.com\/(in|pub)\/[a-zA-Z0-9\-_%.]+/;
+          return regex.test(url);
+        }
+
+        // Email validation
+        function validateEmail(email) {
+          const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return regex.test(email);
+        }
+
         async function submitForm(e) {
             e.preventDefault();
             const url = document.getElementById('linkedin_url').value;
             const email = document.getElementById('email').value;
             const btn = document.getElementById('submitBtn');
+            const errorEl = document.getElementById('formError');
+            errorEl.style.display = 'none';
+
+            // Client-side validation
+            if (!url || !email) {
+                errorEl.textContent = '⚠️ Vul alstublieft beide velden in.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (!validateLinkedInUrl(url)) {
+                errorEl.textContent = '⚠️ Dit lijkt geen geldige LinkedIn profiel-URL.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                errorEl.textContent = '⚠️ Voer alstublieft een geldig emailadres in.';
+                errorEl.style.display = 'block';
+                return;
+            }
 
             btn.textContent = 'Bezig met versturen...';
             btn.disabled = true;
             btn.style.opacity = '0.7';
 
             try {
-                await fetch('https://eu-api.jotform.com/form/260606272965058/submissions', {
+                const response = await fetch('/.netlify/functions/submit', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        'submission[46]': url,
-                        'submission[3]': email,
-                        'apiKey': '8446b2ba4c0c9cc79355873c4479d269'
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ linkedin_url: url, email })
                 });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    errorEl.textContent = `⚠️ ${result.error || 'Er ging iets mis. Probeer het opnieuw.'}`;
+                    errorEl.style.display = 'block';
+                    console.error('Form submission error:', result);
+                    return;
+                }
+
                 document.getElementById('confirmEmail').textContent = email;
                 document.getElementById('successModal').classList.add('active');
                 e.target.reset();
@@ -447,19 +484,42 @@
                 }
                 // LinkedIn Insight Tag
                 if (typeof lintrk === 'function') {
-                    lintrk('track', { conversion_id: 0 }); // TODO: vul conversion_id in
+                    lintrk('track', { conversion_id: 0 });
                 }
 
             } catch (err) {
-                alert('Er ging iets mis. Probeer het opnieuw.');
+                errorEl.textContent = '⚠️ Netwerkfout. Controleer je internetverbinding.';
+                errorEl.style.display = 'block';
+                console.error('Form error:', err);
+            } finally {
+                btn.textContent = 'Ontvang mijn rapport →';
+                btn.disabled = false;
+                btn.style.opacity = '1';
             }
-            btn.textContent = 'Ontvang mijn rapport →';
-            btn.disabled = false;
-            btn.style.opacity = '1';
         }
 
         function closeModal() {
             document.getElementById('successModal').classList.remove('active');
+        }
+
+        // Modal improvements: ESC key + outside click
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('successModal');
+                if (modal && modal.classList.contains('active')) {
+                    closeModal();
+                }
+            }
+        });
+
+        // Close modal on outside click (click on modal background, not modal-box)
+        const modal = document.getElementById('successModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
         }
 
         // Scroll animations
@@ -469,8 +529,10 @@
         document.querySelectorAll('.benefit, .review, .preview-mockup').forEach(el => obs.observe(el));
 
         // Score animation in hero
+        let scoreAnimationTriggered = false;
         const heroObs = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
+            if (entries[0].isIntersecting && !scoreAnimationTriggered) {
+                scoreAnimationTriggered = true;
                 const el = document.getElementById('scoreNum');
                 let n = 0;
                 const iv = setInterval(() => {
@@ -478,11 +540,15 @@
                     el.textContent = n;
                     if (n >= 69) { clearInterval(iv); }
                 }, 25);
-                entries[0].target.querySelectorAll('.bar-fill').forEach((bar, i) => {
-                    setTimeout(() => bar.style.transition = 'width 1s ease', i * 200);
+                // Animate bar fills from 0% to target values
+                entries[0].target.querySelectorAll('.bar-fill').forEach((bar) => {
+                    const target = bar.getAttribute('data-target');
+                    if (target) {
+                        bar.style.width = target;
+                    }
                 });
             }
-        });
+        }, { threshold: 0.5 });
         const scoreCard = document.querySelector('.score-card');
         if (scoreCard) heroObs.observe(scoreCard);
     </script>

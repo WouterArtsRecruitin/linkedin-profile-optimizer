@@ -1,9 +1,9 @@
 [build]
-  base = "landing/"
-  publish = "."
+  publish = "landing"
+  functions = "netlify/functions"
   command = "echo 'Static site - no build needed'"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/*.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
   status = 200
