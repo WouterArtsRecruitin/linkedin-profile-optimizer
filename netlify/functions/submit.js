@@ -114,42 +114,53 @@ async function saveToSupabase(formData) {
 /**
  * Add to Lemlist Campaign
  */
+/**
+ * Add to Lemlist Campaign
+ * Returns true if lead was added (or already existed), false on failure
+ */
 async function addToLemlistCampaign(formData) {
-  const { email, voornaam, achternaam } = formData;
+  const { email, voornaam, achternaam, linkedin_url } = formData;
 
   if (!LEMLIST_CAMPAIGN_ID || !LEMLIST_API_KEY) {
-    console.warn('⚠️  LEMLIST config missing, skipping');
-    return;
+    console.error('🚨 LEMLIST_API_KEY or LEMLIST_CAMPAIGN_ID not configured');
+    return false;
   }
 
-  // Lemlist uses Basic Auth: base64(':apiKey')
-  const basicAuth = Buffer.from(`:${LEMLIST_API_KEY}`).toString('base64');
+  try {
+    // Lemlist uses Basic Auth: base64(':apiKey')
+    const basicAuth = Buffer.from(`:${LEMLIST_API_KEY}`).toString('base64');
 
-  const lemlistRes = await makeRequest(
-    'api.lemlist.com',
-    'POST',
-    `/api/campaigns/${LEMLIST_CAMPAIGN_ID}/leads/`,
-    {
-      'Authorization': `Basic ${basicAuth}`
-    },
-    {
-      email,
-      firstName: voornaam || '',
-      lastName: achternaam || ''
+    const lemlistRes = await makeRequest(
+      'api.lemlist.com',
+      'POST',
+      `/api/campaigns/${LEMLIST_CAMPAIGN_ID}/leads/`,
+      {
+        'Authorization': `Basic ${basicAuth}`
+      },
+      {
+        email,
+        firstName: voornaam || '',
+        lastName: achternaam || '',
+        linkedinUrl: linkedin_url || ''
+      }
+    );
+
+    if (lemlistRes.status === 409) {
+      console.log('ℹ️  Lead already in Lemlist campaign — OK');
+      return true;
     }
-  );
 
-  if (lemlistRes.status === 409) {
-    console.warn('⚠️  Lead already in Lemlist campaign');
-    return;
+    if (lemlistRes.status !== 200 && lemlistRes.status !== 201) {
+      console.error(`🚨 Lemlist API error: ${lemlistRes.status}`, JSON.stringify(lemlistRes.body));
+      return false;
+    }
+
+    console.log('✅ Added to Lemlist campaign');
+    return true;
+  } catch (err) {
+    console.error('🚨 Lemlist request failed:', err.message);
+    return false;
   }
-
-  if (lemlistRes.status !== 200 && lemlistRes.status !== 201) {
-    console.warn(`⚠️  Lemlist error: ${lemlistRes.status}`, JSON.stringify(lemlistRes.body));
-    return;
-  }
-
-  console.log('✅ Added to Lemlist campaign');
 }
 
 /**
@@ -204,7 +215,7 @@ async function sendConfirmationEmail(formData) {
       'Authorization': `Bearer ${RESEND_API_KEY}`
     },
     {
-    from: 'ProfielScore via Recruitin <noreply@kandidatentekort.nl>',
+      from: 'ProfielScore <noreply@kandidatentekort.nl>',
       to: [email],
       subject: 'Je ProfielScore analyse is gestart!',
       html: htmlBody
@@ -220,6 +231,35 @@ async function sendConfirmationEmail(formData) {
 }
 
 /**
+ * Validate required environment variables
+ * Returns array of missing var names, empty if all OK
+ */
+function validateEnvVars() {
+  const required = {
+    SUPABASE_ANON_KEY: SUPABASE_ANON_KEY,
+    RESEND_API_KEY: RESEND_API_KEY,
+  };
+  const warned = {
+    LEMLIST_API_KEY: LEMLIST_API_KEY,
+    LEMLIST_CAMPAIGN_ID: LEMLIST_CAMPAIGN_ID,
+  };
+
+  const missing = Object.entries(required)
+    .filter(([, val]) => !val)
+    .map(([key]) => key);
+
+  const missingWarned = Object.entries(warned)
+    .filter(([, val]) => !val)
+    .map(([key]) => key);
+
+  if (missingWarned.length > 0) {
+    console.warn(`⚠️  Optional env vars missing (Lemlist disabled): ${missingWarned.join(', ')}`);
+  }
+
+  return missing;
+}
+
+/**
  * Main handler
  */
 exports.handler = async (event) => {
@@ -227,6 +267,16 @@ exports.handler = async (event) => {
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method not allowed' })
+    };
+  }
+
+  // Validate env vars on every cold start
+  const missingVars = validateEnvVars();
+  if (missingVars.length > 0) {
+    console.error(`❌ Missing required env vars: ${missingVars.join(', ')}`);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Server configuration error. Please contact support.' })
     };
   }
 
@@ -257,9 +307,18 @@ exports.handler = async (event) => {
 
     console.log(`📨 Processing submission: ${email}`);
 
+    // Step 1: Save to database (critical — fail if this fails)
     await saveToSupabase(formData);
+
+    // Step 2: Send confirmation email (critical — fail if this fails)
     await sendConfirmationEmail(formData);
-    await addToLemlistCampaign(formData);
+
+    // Step 3: Add to Lemlist campaign (important but non-blocking)
+    // Log failure clearly so it can be monitored, but don't fail the user submission
+    const lemlistResult = await addToLemlistCampaign(formData);
+    if (!lemlistResult) {
+      console.error(`🚨 LEMLIST FAILED for ${email} — lead is in Supabase but NOT in campaign. Manual follow-up needed.`);
+    }
 
     return {
       statusCode: 200,
