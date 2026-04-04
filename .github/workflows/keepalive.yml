@@ -1,0 +1,23 @@
+name: Render Keepalive
+
+on:
+  schedule:
+    # Elke 14 minuten (GitHub minimum is 5 min, 14 voorkomt Render sleep na 15 min)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # ook handmatig triggerable
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render service
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 30 \
+            https://linkedin-profile-optimizer-api.onrender.com/)
+          echo "Render ping status: $STATUS"
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 500 ]; then
+            echo "✅ Service is awake"
+          else
+            echo "⚠️  Unexpected status: $STATUS"
+          fi
