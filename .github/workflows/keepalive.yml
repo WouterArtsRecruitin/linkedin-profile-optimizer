@@ -2,7 +2,7 @@ name: Render Keepalive
 
 on:
   schedule:
-    # Elke 14 minuten (GitHub minimum is 5 min, 14 voorkomt Render sleep na 15 min)
+    # Elke 14 minuten — voorkomt Render free-tier sleep (15 min timeout)
     - cron: '*/14 * * * *'
   workflow_dispatch: # ook handmatig triggerable
 
@@ -11,13 +11,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Render service
+        env:
+          RENDER_URL: ${{ secrets.RENDER_URL || 'https://linkedin-profile-optimizer-api.onrender.com/' }}
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            --max-time 30 \
-            https://linkedin-profile-optimizer-api.onrender.com/)
-          echo "Render ping status: $STATUS"
-          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 500 ]; then
-            echo "✅ Service is awake"
-          else
-            echo "⚠️  Unexpected status: $STATUS"
+          MAX_RETRIES=3
+          RETRY_DELAY=10
+          SUCCESS=false
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i/$MAX_RETRIES — pinging $RENDER_URL"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --max-time 60 \
+              "$RENDER_URL") || STATUS="000"
+
+            echo "HTTP status: $STATUS"
+
+            if [ "$STATUS" -ge 200 ] 2>/dev/null && [ "$STATUS" -lt 500 ] 2>/dev/null; then
+              echo "✅ Service is awake (HTTP $STATUS)"
+              SUCCESS=true
+              break
+            fi
+
+            if [ "$i" -lt "$MAX_RETRIES" ]; then
+              echo "⏳ Retrying in ${RETRY_DELAY}s (cold start may be in progress)..."
+              sleep $RETRY_DELAY
+              RETRY_DELAY=$((RETRY_DELAY * 2))
+            fi
+          done
+
+          if [ "$SUCCESS" = false ]; then
+            echo "❌ Service unreachable after $MAX_RETRIES attempts (last status: $STATUS)"
+            echo ""
+            echo "Troubleshooting:"
+            echo "  1. Check RENDER_URL secret is correct"
+            echo "  2. Check Render dashboard: https://dashboard.render.com"
+            echo "  3. Redeploy the service manually if needed"
+            exit 1
           fi
