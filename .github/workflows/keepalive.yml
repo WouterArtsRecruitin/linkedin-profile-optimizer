@@ -1,8 +1,8 @@
-name: Render Keepalive
+name: Site Keepalive
 
 on:
   schedule:
-    # Elke 14 minuten — voorkomt Render free-tier sleep (15 min timeout)
+    # Elke 14 minuten — houdt de site warm
     - cron: '*/14 * * * *'
   workflow_dispatch: # ook handmatig triggerable
 
@@ -10,41 +10,35 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Render service
-        env:
-          RENDER_URL: ${{ secrets.RENDER_URL || 'https://linkedin-profile-optimizer-api.onrender.com/' }}
+      - name: Ping site
         run: |
+          SITE_URL="https://www.profielscore.nl"
           MAX_RETRIES=3
           RETRY_DELAY=10
           SUCCESS=false
 
           for i in $(seq 1 $MAX_RETRIES); do
-            echo "Attempt $i/$MAX_RETRIES — pinging $RENDER_URL"
+            echo "Attempt $i/$MAX_RETRIES — pinging $SITE_URL"
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-              --max-time 60 \
-              "$RENDER_URL") || STATUS="000"
+              --max-time 30 \
+              "$SITE_URL") || STATUS="000"
 
             echo "HTTP status: $STATUS"
 
             if [ "$STATUS" -ge 200 ] 2>/dev/null && [ "$STATUS" -lt 500 ] 2>/dev/null; then
-              echo "✅ Service is awake (HTTP $STATUS)"
+              echo "✅ Site is live (HTTP $STATUS)"
               SUCCESS=true
               break
             fi
 
             if [ "$i" -lt "$MAX_RETRIES" ]; then
-              echo "⏳ Retrying in ${RETRY_DELAY}s (cold start may be in progress)..."
+              echo "⏳ Retrying in ${RETRY_DELAY}s..."
               sleep $RETRY_DELAY
               RETRY_DELAY=$((RETRY_DELAY * 2))
             fi
           done
 
           if [ "$SUCCESS" = false ]; then
-            echo "❌ Service unreachable after $MAX_RETRIES attempts (last status: $STATUS)"
-            echo ""
-            echo "Troubleshooting:"
-            echo "  1. Check RENDER_URL secret is correct"
-            echo "  2. Check Render dashboard: https://dashboard.render.com"
-            echo "  3. Redeploy the service manually if needed"
+            echo "❌ Site unreachable after $MAX_RETRIES attempts (last status: $STATUS)"
             exit 1
           fi
