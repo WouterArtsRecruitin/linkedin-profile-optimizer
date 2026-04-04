@@ -215,7 +215,7 @@ async function sendConfirmationEmail(formData) {
       'Authorization': `Bearer ${RESEND_API_KEY}`
     },
     {
-      from: 'ProfielScore <noreply@profielscore.nl>',
+      from: 'ProfielScore <noreply@kandidatentekort.nl>',
       to: [email],
       subject: 'Je ProfielScore analyse is gestart!',
       html: htmlBody
