@@ -472,9 +472,10 @@
                         content_category: 'linkedin_optimizer'
                     });
                 }
-                if (typeof lintrk === 'function') {
-                    lintrk('track', { conversion_id: 0 });
-                }
+                // LinkedIn conversion tracking — set conversion_id in LinkedIn Campaign Manager
+                // if (typeof lintrk === 'function') {
+                //     lintrk('track', { conversion_id: YOUR_CONVERSION_ID });
+                // }
 
             } catch (err) {
                 errorEl.textContent = '⚠️ Netwerkfout. Controleer je internetverbinding.';
