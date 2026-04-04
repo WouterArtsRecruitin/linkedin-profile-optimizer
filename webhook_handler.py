@@ -545,24 +545,30 @@ async def profielscore_submit(request: Request):
         print(f"📨 ProfielScore submit: {email} ({linkedin_url})")
         print(f"{'='*60}")
 
-        # Bouw ProfileIntake met beschikbare data + sectordefaults
+        # Bouw ProfileIntake — gebruik opgegeven velden, defaults voor ontbrekende
         intake = ProfileIntake(
             first_name=voornaam or "HR",
             last_name=achternaam or "Professional",
             email=email,
-            location="Nederland",
+            location=data.get("location", "Nederland"),
             linkedin_url=linkedin_url,
-            current_headline=f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else "HR & Recruitment Professional",
-            current_about="geen",
-            current_job_title="HR / Recruitment Professional",
-            current_employer=bedrijfsnaam or "Onbekend",
-            linkedin_goal="Meer klanten / opdrachten krijgen",
-            target_sector="HR & Recruitment",
-            target_audience="HR-managers en directeuren bij technische bedrijven",
-            top_3_skills="Recruitment, Werving & Selectie, Employer Branding",
-            current_skills="Recruitment, Headhunting, LinkedIn Recruiter, Employer Branding",
-            banner_style="Modern & Professioneel",
-            banner_color_preference="Laat de agent kiezen",
+            current_headline=data.get("current_headline") or (f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else "HR & Recruitment Professional"),
+            current_about=data.get("current_about", "geen"),
+            current_job_title=data.get("current_job_title", "HR / Recruitment Professional"),
+            current_employer=data.get("current_employer", bedrijfsnaam or "Onbekend"),
+            years_experience=data.get("years_experience", "6-10 jaar"),
+            current_job_description=data.get("current_job_description", ""),
+            previous_experience=data.get("previous_experience", ""),
+            linkedin_goal=data.get("linkedin_goal", "Meer klanten / opdrachten krijgen"),
+            target_sector=data.get("target_sector", "HR & Recruitment"),
+            target_audience=data.get("target_audience", "HR-managers en directeuren bij technische bedrijven"),
+            top_3_skills=data.get("top_3_skills", "Recruitment, Werving & Selectie, Employer Branding"),
+            unique_value=data.get("unique_value", ""),
+            education=data.get("education", ""),
+            certificates=data.get("certificates", ""),
+            current_skills=data.get("current_skills", "Recruitment, LinkedIn Recruiter, Employer Branding"),
+            banner_style=data.get("banner_style", "Modern & Professioneel"),
+            banner_color_preference=data.get("banner_color_preference", "Laat de agent kiezen"),
         )
 
         # Run analyse
