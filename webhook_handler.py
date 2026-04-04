@@ -640,28 +640,15 @@ async def profielscore_submit(request: Request):
         </div>
         """
 
-        import urllib.request
-        import json as json_lib
-
-        resend_body = json_lib.dumps({
+        import resend as resend_lib
+        resend_lib.api_key = resend_api_key
+        send_result = resend_lib.Emails.send({
             "from": "ProfielScore <noreply@kandidatentekort.nl>",
             "to": [email],
-            "subject": f"Je ProfielScore Rapport — {score}/100 (Grade {grade})",
+            "subject": f"Je ProfielScore Rapport - {score}/100 (Grade {grade})",
             "html": html_body
-        }).encode("utf-8")
-
-        req = urllib.request.Request(
-            "https://api.resend.com/emails",
-            data=resend_body,
-            headers={
-                "Authorization": f"Bearer {resend_api_key}",
-                "Content-Type": "application/json"
-            },
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            resp_body = resp.read().decode()
-            print(f"   ✅ Rapport email verstuurd: {resp_body}")
+        })
+        print(f"   ✅ Rapport email verstuurd: {send_result}")
 
         return JSONResponse(content={
             "status": "success",
