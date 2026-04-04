@@ -231,6 +231,33 @@ async function sendConfirmationEmail(formData) {
 }
 
 /**
+ * Fire-and-forget: trigger Render analyse + rapport email
+ * Geen await — Netlify function wacht niet op Render response
+ */
+function triggerRenderAnalysis(formData) {
+  const body = JSON.stringify(formData);
+  const req = https.request({
+    hostname: 'linkedin-profile-optimizer-api.onrender.com',
+    port: 443,
+    path: '/profielscore-submit',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body)
+    },
+    timeout: 300000 // 5 min timeout op Render zijde
+  }, (res) => {
+    let data = '';
+    res.on('data', chunk => data += chunk);
+    res.on('end', () => console.log(`📊 Render analyse klaar: ${res.statusCode} - ${data.substring(0, 100)}`))
+  });
+  req.on('error', (err) => console.warn(`⚠️  Render analyse fout: ${err.message}`));
+  req.write(body);
+  req.end();
+  console.log('🚀 Render analyse getriggerd (async)');
+}
+
+/**
  * Validate required environment variables
  * Returns array of missing var names, empty if all OK
  */
@@ -307,17 +334,19 @@ exports.handler = async (event) => {
 
     console.log(`📨 Processing submission: ${email}`);
 
-    // Step 1: Save to database (critical — fail if this fails)
+    // Step 1: Save to database
     await saveToSupabase(formData);
 
-    // Step 2: Send confirmation email (critical — fail if this fails)
+    // Step 2: Send immediate confirmation email
     await sendConfirmationEmail(formData);
 
-    // Step 3: Add to Lemlist campaign (important but non-blocking)
-    // Log failure clearly so it can be monitored, but don't fail the user submission
+    // Step 3: Fire-and-forget → Render analyse + rapport email (async, geen wachten)
+    triggerRenderAnalysis(formData);
+
+    // Step 4: Add to Lemlist campaign (non-blocking)
     const lemlistResult = await addToLemlistCampaign(formData);
     if (!lemlistResult) {
-      console.error(`🚨 LEMLIST FAILED for ${email} — lead is in Supabase but NOT in campaign. Manual follow-up needed.`);
+      console.warn(`⚠️  Lemlist failed for ${email} — lead in Supabase, rapport via Resend OK`);
     }
 
     return {

@@ -522,6 +522,163 @@ async def analyze_profile(intake_data: dict):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/profielscore-submit")
+async def profielscore_submit(request: Request):
+    """
+    Automatische flow voor profielscore.nl form submissions.
+    Aangeroepen (fire-and-forget) door de Netlify submit function.
+
+    1. Ontvang minimale form data (naam, email, linkedin_url, bedrijf)
+    2. Bouw ProfileIntake met defaults voor ontbrekende velden
+    3. Run volledige analyse pipeline
+    4. Stuur rapport email via Resend
+    """
+    try:
+        data = await request.json()
+        email = data.get("email", "")
+        voornaam = data.get("voornaam", "")
+        achternaam = data.get("achternaam", "")
+        bedrijfsnaam = data.get("bedrijfsnaam", "")
+        linkedin_url = data.get("linkedin_url", "")
+
+        print(f"\n{'='*60}")
+        print(f"📨 ProfielScore submit: {email} ({linkedin_url})")
+        print(f"{'='*60}")
+
+        # Bouw ProfileIntake met beschikbare data + sectordefaults
+        intake = ProfileIntake(
+            first_name=voornaam or "HR",
+            last_name=achternaam or "Professional",
+            email=email,
+            location="Nederland",
+            linkedin_url=linkedin_url,
+            current_headline=f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else "HR & Recruitment Professional",
+            current_about="geen",
+            current_job_title="HR / Recruitment Professional",
+            current_employer=bedrijfsnaam or "Onbekend",
+            linkedin_goal="Meer klanten / opdrachten krijgen",
+            target_sector="HR & Recruitment",
+            target_audience="HR-managers en directeuren bij technische bedrijven",
+            top_3_skills="Recruitment, Werving & Selectie, Employer Branding",
+            current_skills="Recruitment, Headhunting, LinkedIn Recruiter, Employer Branding",
+            banner_style="Modern & Professioneel",
+            banner_color_preference="Laat de agent kiezen",
+        )
+
+        # Run analyse
+        analysis = run_full_analysis(intake)
+        score = analysis.score.total_score
+        grade = analysis.score.grade
+        naam = intake.full_name
+        first = voornaam or naam.split(" ")[0]
+
+        print(f"   ✅ Analyse klaar: {score}/100 (Grade {grade})")
+
+        # Stuur rapport email via Resend
+        resend_api_key = os.environ.get("RESEND_API_KEY", "")
+        if not resend_api_key:
+            print("   ⚠️ RESEND_API_KEY niet ingesteld")
+            return JSONResponse(content={"status": "error", "message": "RESEND_API_KEY missing"})
+
+        score_color = "#16a34a" if score >= 70 else "#d97706" if score >= 50 else "#dc2626"
+        score_label = "Goed" if score >= 70 else "Verbetering mogelijk" if score >= 50 else "Verbetering nodig"
+
+        headline_html = "".join([
+            f'<div style="background:#f7f3ff;border-left:4px solid #7c3aed;padding:14px 16px;border-radius:0 8px 8px 0;margin-bottom:10px;">'
+            f'<p style="margin:0 0 4px;font-size:11px;color:#7c3aed;font-weight:bold;text-transform:uppercase;">{h.style}</p>'
+            f'<p style="margin:0;color:#1a1a2e;font-size:14px;">{h.text}</p></div>'
+            for h in analysis.headline_options[:3]
+        ])
+
+        keywords_html = "".join([
+            f'<span style="display:inline-block;background:#ede9fe;color:#6d28d9;padding:6px 12px;border-radius:20px;font-size:13px;margin:4px;">{k.keyword}</span>'
+            for k in analysis.seo_keywords[:8]
+        ])
+
+        action_html = "".join([
+            f'<div style="display:flex;align-items:flex-start;margin-bottom:12px;">'
+            f'<span style="background:#7c3aed;color:#fff;border-radius:50%;min-width:24px;height:24px;line-height:24px;text-align:center;font-size:12px;font-weight:bold;margin-right:12px;">{i+1}</span>'
+            f'<p style="margin:0;color:#374151;font-size:14px;line-height:1.5;padding-top:4px;">{item}</p></div>'
+            for i, item in enumerate(analysis.action_items[:6])
+        ])
+
+        html_body = f"""
+        <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;color:#1a1a2e;">
+          <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);padding:48px 40px;text-align:center;">
+            <h1 style="color:#fff;margin:0 0 8px;font-size:32px;letter-spacing:-1px;">ProfielScore</h1>
+            <p style="color:#a78bfa;margin:0;font-size:15px;">LinkedIn Profiel Analyse Rapport</p>
+          </div>
+          <div style="padding:40px;text-align:center;border-bottom:1px solid #f0f0f0;">
+            <div style="display:inline-block;background:{score_color};border-radius:50%;width:100px;height:100px;line-height:100px;margin:0 auto;">
+              <span style="color:#fff;font-size:42px;font-weight:bold;">{score}</span>
+            </div>
+            <p style="color:#6b7280;margin:8px 0 0;font-size:14px;">van de 100 punten</p>
+            <p style="color:{score_color};font-size:18px;font-weight:bold;margin:8px 0 0;">{score_label} — Grade {grade}</p>
+            <h2 style="color:#1a1a2e;margin:24px 0 8px;">Hoi {first},</h2>
+            <p style="color:#4a5568;line-height:1.7;max-width:480px;margin:0 auto;">
+              Je ProfielScore is <strong>{score}/100</strong>. Hieronder vind je je persoonlijke analyse met concrete verbeterpunten.
+            </p>
+          </div>
+          <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
+            <h3 style="color:#1a1a2e;margin:0 0 20px;">🎯 Aanbevolen Headline Opties</h3>
+            {headline_html}
+          </div>
+          <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
+            <h3 style="color:#1a1a2e;margin:0 0 16px;">🔍 Ontbrekende SEO Keywords</h3>
+            <p style="color:#4a5568;font-size:14px;margin:0 0 16px;">Voeg deze keywords toe voor betere vindbaarheid:</p>
+            <div>{keywords_html}</div>
+          </div>
+          <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
+            <h3 style="color:#1a1a2e;margin:0 0 20px;">✅ Jouw Actieplan</h3>
+            {action_html}
+          </div>
+          <div style="padding:40px;text-align:center;background:#fafafa;">
+            <p style="color:#4a5568;margin:0 0 24px;">Vragen of hulp bij implementatie?</p>
+            <a href="mailto:wouter.arts@recruitin.nl" style="display:inline-block;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;">Neem contact op</a>
+          </div>
+          <div style="background:#1a1a2e;padding:24px;text-align:center;">
+            <p style="color:#6b7280;font-size:12px;margin:0;">profielscore.nl — een dienst van Recruitin B.V. | Doesburg</p>
+          </div>
+        </div>
+        """
+
+        import urllib.request
+        import json as json_lib
+
+        resend_body = json_lib.dumps({
+            "from": "ProfielScore <noreply@kandidatentekort.nl>",
+            "to": [email],
+            "subject": f"Je ProfielScore Rapport — {score}/100 (Grade {grade})",
+            "html": html_body
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=resend_body,
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            resp_body = resp.read().decode()
+            print(f"   ✅ Rapport email verstuurd: {resp_body}")
+
+        return JSONResponse(content={
+            "status": "success",
+            "email": email,
+            "score": score,
+            "grade": grade,
+        })
+
+    except Exception as e:
+        print(f"❌ ProfielScore Submit Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============================================================
 # RUN
 # ============================================================
