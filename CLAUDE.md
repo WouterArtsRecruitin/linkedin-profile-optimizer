@@ -1,7 +1,7 @@
 # ProfielScore Landing Page — Design & Architecture
 
 **Project:** LinkedIn Profile Optimizer (ProfielScore)  
-**Version:** 2.0 (High-Conversion Funnel Redesign — Apr 2026)  
+**Version:** 3.0 (HRM Pivot — Apr 2026)  
 **Live:** https://profielscore.nl  
 **Deployed:** Netlify (auto-deploy on push main)
 
@@ -9,27 +9,25 @@
 
 ## Design Philosophy
 
-The landing page follows a **trust-before-conversion** funnel that addresses a critical insight:
+The landing page targets **HRM managers / recruitment managers bij technische MKB (80-800 medewerkers)**.
 
-> Visitors come with skepticism. Asking them to fill a form before proving value fails. Build trust first → then convert.
+> Core insight: Techtalent bekijkt het LinkedIn profiel van de recruiter/HRM manager VOORDAT ze reageren op een vacature. Als dat profiel generiek oogt → minder sollicitaties.
 
-**New Flow (Apr 2026):**
+**Flow (v3.0 — Apr 2026):**
 ```
-Hero (pain → hope) 
+Hero ("Techtalent kiest de manager. Ziet jouw LinkedIn er klaar voor uit?")
   ↓ 
-Stats (social proof: 2.400+ analyses, 4.8★, +47% views)
+Stats (social proof: 2.400+ profielen, 4.8★, +47% inbound talent)
   ↓ 
-Before/After (visual proof of results: 42 → 87)
+Before/After (visual proof: 42 → 87)
   ↓ 
-Benefits (outcome-focused, not feature-focused)
+Benefits ("Drie dingen die meer talent opleveren")
   ↓ 
-How It Works (demystify the process)
+How It Works ("AI bekijkt hoe techtalent jou ziet")
   ↓ 
-Reviews (social proof from real users)
+Reviews (HRM personas: Anke de Vries, Thomas Bakker)
   ↓ 
-Second CTA (re-engagement)
-  ↓ 
-Form (2-step, low friction)
+Second CTA ("Klaar om meer techtalent te bereiken?")
 ```
 
 ---
@@ -70,14 +68,14 @@ Form (2-step, low friction)
 Fixed top, dark with blur backdrop, logo left + CTA button (magenta outline, hover fill).
 
 ### 2. Hero
-**Hook:** `"Recruiters scrollen voorbij jou. Nog niet."`  
-**Subhead:** `"Krijg gratis je LinkedIn ProfielScore — en zie precies wat je mist."`
+**Hook:** `"Techtalent kiest de manager. Ziet jouw LinkedIn er klaar voor uit?"`  
+**Subhead:** `"Ontdek in 60 seconden waarom techtalent voorbijscrollt — en wat jij morgen kunt veranderen."`
 
 **Content:**
 - Hero blob (magenta, pulsing) on right side
 - H1 + subhead (left side, z-index 2)
 - **2-Step Form** (see Form section below)
-- Score card mockup (visual trust signal)
+- Single-line privacy link (minimal)
 
 **Height:** 700px min (desktop), 600px (tablet)
 
@@ -87,7 +85,7 @@ Fixed top, dark with blur backdrop, logo left + CTA button (magenta outline, hov
 **Layout:**
 ```
 [2.400+]     [4.8★]          [+47%]
- analyses  gemiddelde beoordeling  meer weergaven
+ profielen geanalyseerd  gemiddelde beoordeling  meer inbound talent
 ```
 
 **CSS:** Gradient background, stat items flex-centered, dividers 1px tall.  
@@ -103,12 +101,12 @@ Fixed top, dark with blur backdrop, logo left + CTA button (magenta outline, hov
 
 **Hover effect:** Border color shift + magenta glow.
 
-### 5. Benefits (Outcome-Focused)
-**Heading:** `"Drie dingen die veranderen"`
+### 5. Benefits (HRM-Focused)
+**Heading:** `"Drie dingen die meer talent opleveren"`
 
 **Cards (3-column grid):**
-1. **"Zie waarom je gemist wordt"** — Score laat per onderdeel zien what recruiters see
-2. **"Ontvang teksten die wél werken"** — Headline & About herschreven door AI
+1. **"Zie hoe techtalent jou ziet"** — Score toont wat werkzoekende techneut als eerste ziet
+2. **"Ontvang teksten die talent aantrekt"** — Headline & About herschreven door AI
 3. **"Val op in elke zoekopdracht"** — Keywords + banner = visibility
 
 **Design:** Dark surface cards with magenta dot top indicator.
@@ -117,9 +115,9 @@ Fixed top, dark with blur backdrop, logo left + CTA button (magenta outline, hov
 **Purpose:** Demystify the process, reduce anxiety.
 
 **Steps (3-column grid):**
-1. **Plak je LinkedIn URL** — No password, no account access
-2. **AI analyseert je profiel** — Compared to thousands of optimized examples
-3. **Ontvang je rapport** — Within minutes in your inbox
+1. **Plak je LinkedIn URL** — Jouw publieke profiel, geen inloggegevens nodig
+2. **AI bekijkt hoe techtalent jou ziet** — Vergeleken met profielen die wél talent aantrekken
+3. **Ontvang je rapport** — Score, verbeterpunten en herschreven teksten in je inbox
 
 **Design:** Numbered circles (56px), step titles, descriptive copy.
 
@@ -138,7 +136,7 @@ Fixed top, dark with blur backdrop, logo left + CTA button (magenta outline, hov
 **Purpose:** Re-engagement midway through page.
 
 **Content:**
-- H2: "Klaar om meer recruiter contact te krijgen?"
+- H2: "Klaar om meer techtalent te bereiken?"
 - Subtext: "Gratis. In 60 seconden. Geen software nodig."
 - Button + trust copy (no account, no software, no spam)
 
@@ -164,8 +162,7 @@ Geen account. Geen software. Gratis.
 [E-mail] (required)
 ─ Optioneel — voor een persoonlijkere analyse ─
 [Voornaam]  [Achternaam]
-[Telefoon]
-[Doel: Meer views / Recruiter contact / Alles optimaliseren]
+[Telefoon]  [Bedrijfsnaam]
 [Verstuur mijn analyse →]
 ```
 
@@ -215,7 +212,6 @@ Shows email confirmation + 3-step progress:
 
 ### Animations & Observers
 - **Intersection Observer** — Animates `.benefit`, `.review` cards on scroll (fade-in + translateY)
-- **Score Card Animation** — Counts up from 0 → 69 on scroll into view, fills bar graphs
 
 ### Event Listeners
 - **Modal Close:** Escape key + outside-click handlers
@@ -234,9 +230,12 @@ Shows email confirmation + 3-step progress:
 - Build command: (default, static HTML/CSS/JS — no build step)
 - Publish directory: `.` (project root)
 
-**Environment Variables:** (if needed for Netlify functions)
+**Environment Variables (set via Netlify CLI, apr 2026):**
 ```
-# Set in Netlify UI under Site Settings → Build & Deploy → Environment
+SUPABASE_URL=https://jdistoacicmzdazdaubh.supabase.co
+SUPABASE_ANON_KEY=eyJ...  (anon role, RLS INSERT policy active)
+LEMLIST_API_KEY=1d17...
+LEMLIST_CAMPAIGN_ID=cam_F34D7zDwLkZhvCWQY
 ```
 
 ---
@@ -263,32 +262,24 @@ landing-optimizer/
 
 ## Next Steps (Backlog)
 
-- [ ] **Netlify Function:** Create `netlify/functions/submit.js` to handle form submissions
-  - Input: LinkedIn URL, email, optional fields
-  - Output: Trigger analysis, send to Supabase + Lemlist + Jotform
-  - Tracking: GA4, Meta Pixel, LinkedIn events
+- [x] **Netlify Function:** `netlify/functions/submit.js` — form → Supabase + Lemlist ✅
+- [x] **Supabase Integration:** `profielscore_leads` table with RLS INSERT policy ✅
+  - Columns: email, linkedin_url, voornaam, achternaam, telefoonnummer, bedrijfsnaam, status, source, created_at
+- [x] **Netlify Env Vars:** SUPABASE_URL, SUPABASE_ANON_KEY, LEMLIST_API_KEY, LEMLIST_CAMPAIGN_ID ✅
+- [x] **HRM Pivot:** All copy updated from candidate → HRM/recruitment manager targeting ✅
+- [x] **Hero Cleanup:** Disclaimer removed, score card removed, minimal hero ✅
 
-- [ ] **Supabase Integration:** Store leads in `profielscore_leads` table
-  - Columns: email, linkedin_url, voornaam, achternaam, telefoonnummer, doel, created_at
-  - RLS: Restrict public access
+- [ ] **Lemlist Email Sequence:** Configure 4-email sequence in Lemlist UI
+  - Campaign: `cam_F34D7zDwLkZhvCWQY`
+  - Sequence: Day 0 confirmation, Day 3 value, Day 7 CTA, Day 14 breakup
 
-- [ ] **Lemlist Campaign:** Create automated sequence for leads
-  - Campaign: `cam_profielscore_optimizer`
-  - Sequence: Day 0 confirmation, Day 3 value email, Day 7 CTA, Day 14 breakup
+- [ ] **PDF Rapport Generation:** Make.com/Zapier trigger → generate PDF → email
 
-- [ ] **Email Automation:** Send PDF rapport within 24h
-  - Tool: Make.com or Zapier
-  - Trigger: Form submission
-  - Action: Generate rapport PDF, email to user
+- [ ] **Lead Scoring:** LinkedIn profiel analyse → ICP score in Supabase
 
-- [ ] **A/B Testing:** Test hook variations, CTA colors, form friction
-  - Variant A: Current design
-  - Variant B: Different hook ("Je LinkedIn profiel verdient beter")
-  - Variant C: Form-first variant (test friction hypothesis)
+- [ ] **A/B Testing:** Test HRM hook variations, CTA colors
 
-- [ ] **Analytics Dashboard:** Track funnel metrics
-  - Metrics: Visitors, hook impressions, form starts, form completes, conversion rate
-  - Tools: GA4 + Data Studio
+- [ ] **Analytics Dashboard:** GA4 + Data Studio funnel metrics
 
 ---
 
@@ -334,6 +325,7 @@ This reframe increases perceived value by 20-30% (based on copywriting research)
 |---------|------|---------|
 | 1.0 | Mar 2026 | Initial minimal design |
 | 2.0 | Apr 2026 | Funnel redesign: blob, 2-step form, stats strip, outcome-focused copy |
+| 3.0 | Apr 2026 | HRM pivot: all copy → techtalent/HRM, doel→bedrijfsnaam, Netlify+Supabase+Lemlist live, hero cleanup |
 
 ---
 

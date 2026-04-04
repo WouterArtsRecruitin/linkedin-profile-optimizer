@@ -5,8 +5,9 @@
  * Flow:
  * 1. Receive form data (LinkedIn URL, email, name, company)
  * 2. Save to Supabase (profielscore_leads table)
- * 3. Add to Lemlist campaign
- * 4. Return success
+ * 3. Send immediate confirmation email via Resend
+ * 4. Add to Lemlist campaign (follow-up sequence)
+ * 5. Return success
  */
 
 const https = require('https');
@@ -16,6 +17,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jdistoacicmzdazdaubh.s
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const LEMLIST_API_KEY = process.env.LEMLIST_API_KEY;
 const LEMLIST_CAMPAIGN_ID = process.env.LEMLIST_CAMPAIGN_ID;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 // Parse Supabase hostname from URL
 const SUPABASE_HOST = SUPABASE_URL.replace('https://', '').replace('http://', '');
@@ -146,6 +148,73 @@ async function addToLemlistCampaign(formData) {
 }
 
 /**
+ * Send immediate confirmation email via Resend
+ */
+async function sendConfirmationEmail(formData) {
+  const { email, voornaam } = formData;
+  const naam = voornaam ? voornaam : 'daar';
+
+  if (!RESEND_API_KEY) {
+    console.warn('⚠️  RESEND_API_KEY missing, skipping confirmation email');
+    return;
+  }
+
+  const htmlBody = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a2e;">
+      <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 40px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px;">ProfielScore</h1>
+        <p style="color: #a78bfa; margin: 8px 0 0;">LinkedIn Profiel Analyse</p>
+      </div>
+      <div style="padding: 40px; background: #ffffff;">
+        <h2 style="color: #1a1a2e;">Hoi ${naam},</h2>
+        <p style="color: #4a5568; line-height: 1.6;">
+          Bedankt voor je aanmelding bij ProfielScore! We hebben je LinkedIn-profiel ontvangen en zijn gestart met de analyse.
+        </p>
+        <div style="background: #f7f3ff; border-left: 4px solid #7c3aed; padding: 20px; border-radius: 8px; margin: 24px 0;">
+          <p style="margin: 0; color: #1a1a2e; font-weight: bold;">Wat kun je verwachten?</p>
+          <ul style="color: #4a5568; line-height: 2; margin: 12px 0 0;">
+            <li>Je persoonlijke ProfielScore (0-100)</li>
+            <li>Concrete verbeterpunten voor jouw profiel</li>
+            <li>Tips om meer techtalent aan te trekken</li>
+          </ul>
+        </div>
+        <p style="color: #4a5568;">Je rapport ontvang je <strong>binnen 24 uur</strong> op dit e-mailadres.</p>
+        <p style="color: #718096; font-size: 14px; margin-top: 40px;">
+          Met vriendelijke groet,<br>
+          <strong>Wouter Arts</strong><br>
+          Recruitin B.V.
+        </p>
+      </div>
+      <div style="background: #f8f8f8; padding: 20px; text-align: center; font-size: 12px; color: #a0aec0;">
+        profielscore.nl &mdash; een dienst van Recruitin B.V.
+      </div>
+    </div>
+  `;
+
+  const resendRes = await makeRequest(
+    'api.resend.com',
+    'POST',
+    '/emails',
+    {
+      'Authorization': `Bearer ${RESEND_API_KEY}`
+    },
+    {
+      from: 'Recruitin <noreply@recruitin.nl>',
+      to: [email],
+      subject: 'Je ProfielScore analyse is gestart!',
+      html: htmlBody
+    }
+  );
+
+  if (resendRes.status !== 200 && resendRes.status !== 201) {
+    console.warn(`⚠️  Resend error: ${resendRes.status}`, JSON.stringify(resendRes.body));
+    return;
+  }
+
+  console.log('✅ Confirmation email sent via Resend');
+}
+
+/**
  * Main handler
  */
 exports.handler = async (event) => {
@@ -184,6 +253,7 @@ exports.handler = async (event) => {
     console.log(`📨 Processing submission: ${email}`);
 
     await saveToSupabase(formData);
+    await sendConfirmationEmail(formData);
     await addToLemlistCampaign(formData);
 
     return {
