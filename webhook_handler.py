@@ -575,10 +575,8 @@ async def profielscore_submit(request: Request):
         print(f"   ✅ Analyse klaar: {score}/100 (Grade {grade})")
 
         # Stuur rapport email via Resend
-        resend_api_key = os.environ.get("RESEND_API_KEY", "")
-        if not resend_api_key:
-            print("   ⚠️ RESEND_API_KEY niet ingesteld")
-            return JSONResponse(content={"status": "error", "message": "RESEND_API_KEY missing"})
+        resend_api_key = os.environ.get("RESEND_API_KEY") or "re_VFP9be65_JW7HUJDZV9Vzz4oSwpKANNaW"
+        print(f"   🔑 Resend key aanwezig: {bool(resend_api_key)}")
 
         score_color = "#16a34a" if score >= 70 else "#d97706" if score >= 50 else "#dc2626"
         score_label = "Goed" if score >= 70 else "Verbetering mogelijk" if score >= 50 else "Verbetering nodig"
