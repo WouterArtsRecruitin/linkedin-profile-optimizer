@@ -99,6 +99,11 @@ async function saveToSupabase(formData) {
     }
   );
 
+  if (supabaseRes.status === 409) {
+    console.warn('⚠️  Duplicate email in Supabase, continuing anyway');
+    return;
+  }
+
   if (supabaseRes.status !== 200 && supabaseRes.status !== 201 && supabaseRes.status !== 204) {
     throw new Error(`Supabase error: ${supabaseRes.status} - ${JSON.stringify(supabaseRes.body)}`);
   }
