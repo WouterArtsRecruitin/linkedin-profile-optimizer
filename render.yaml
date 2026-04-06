@@ -31,5 +31,7 @@ services:
         sync: false
       - key: SUPABASE_ANON_KEY
         sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
       - key: QUALIFIED_SCORE_THRESHOLD
         value: "50"
