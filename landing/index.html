@@ -120,8 +120,7 @@
 
                         <div class="pdf-upload-section">
                             <div class="pdf-upload-header">
-                                <span class="pdf-badge">AANBEVOLEN</span>
-                                Upload je LinkedIn PDF — voor de meest complete analyse
+                                Upload je LinkedIn PDF
                             </div>
                             <p class="pdf-upload-hint">
                                 Open LinkedIn → jouw profiel → <strong>Meer</strong> → <strong>Opslaan als PDF</strong> (duurt 10 sec)
@@ -132,7 +131,6 @@
                                 <div class="pdf-upload-meta">Max 5 MB · alleen .pdf</div>
                                 <input type="file" id="linkedin_pdf" name="linkedin_pdf" accept=".pdf" style="display:none" />
                             </label>
-                            <p class="pdf-upload-note">Zonder PDF analyseren we op basis van je publieke URL — met PDF krijg je het volledige rapport.</p>
                         </div>
 
                         <button type="submit" class="btn-primary" id="submitBtn">
@@ -480,6 +478,13 @@
 
             if (!validateEmail(email)) {
                 errorEl.textContent = '⚠️ Voer alstublieft een geldig emailadres in.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            // PDF is verplicht
+            if (!pdfFile) {
+                errorEl.textContent = '⚠️ Upload je LinkedIn PDF om de analyse te starten.';
                 errorEl.style.display = 'block';
                 return;
             }
