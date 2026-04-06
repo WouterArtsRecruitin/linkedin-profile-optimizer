@@ -36,6 +36,18 @@ except Exception as e:
     db = None
     print(f"⚠️  Supabase niet beschikbaar: {e}")
 
+# Service role client voor status updates (bypass RLS)
+db_admin = None
+try:
+    from supabase import create_client
+    _sr_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+    _sr_url = os.environ.get("SUPABASE_URL", "")
+    if _sr_key and _sr_url:
+        db_admin = create_client(_sr_url, _sr_key)
+        print("✅ Supabase admin (service role) verbonden")
+except Exception as e:
+    print(f"⚠️  Supabase admin niet beschikbaar: {e}")
+
 # Init clients
 lemlist = LemlistClient()
 pipedrive = PipedriveClient()
@@ -593,9 +605,9 @@ async def profielscore_submit(request: Request):
         print(f"{'='*60}")
 
         # Update Supabase status → "analyzing"
-        if db:
+        if db_admin:
             try:
-                db.client.table("profielscore_leads").update(
+                db_admin.table("profielscore_leads").update(
                     {"status": "analyzing"}
                 ).eq("email", email).execute()
                 print(f"   💾 Status → analyzing")
@@ -749,9 +761,9 @@ async def profielscore_submit(request: Request):
             print(f"   ⚠️ deliver_report fout (non-blocking): {e}")
 
         # P3: Update Supabase status → "completed"
-        if db:
+        if db_admin:
             try:
-                db.client.table("profielscore_leads").update(
+                db_admin.table("profielscore_leads").update(
                     {"status": "completed"}
                 ).eq("email", email).execute()
                 print(f"   💾 Status → completed")
@@ -771,9 +783,9 @@ async def profielscore_submit(request: Request):
         traceback.print_exc()
 
         # P3: Update Supabase status → "failed"
-        if db:
+        if db_admin:
             try:
-                db.client.table("profielscore_leads").update(
+                db_admin.table("profielscore_leads").update(
                     {"status": "failed"}
                 ).eq("email", data.get("email", "")).execute()
             except Exception:
