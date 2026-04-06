@@ -20,7 +20,6 @@ from dotenv import load_dotenv
 
 from models import ProfileIntake
 from run_analysis import run_full_analysis
-from analyzer.linkedin_scraper import scrape_linkedin_profile
 from db.clay_client import ClayEnrichment
 from db.lemlist_client import LemlistClient
 from db.pipedrive_client import PipedriveClient
@@ -614,29 +613,17 @@ async def profielscore_submit(request: Request):
             except Exception as e:
                 print(f"   ⚠️ Supabase status update: {e}")
 
-        # P1: Scrape LinkedIn profiel voor echte data
-        scraped = {}
-        if linkedin_url:
-            try:
-                scraped = scrape_linkedin_profile(linkedin_url)
-                if scraped:
-                    print(f"   ✅ LinkedIn data: {', '.join(scraped.keys())}")
-                else:
-                    print(f"   ⚠️ Geen LinkedIn data — defaults worden gebruikt")
-            except Exception as e:
-                print(f"   ⚠️ LinkedIn scraping fout: {e}")
-
-        # Bouw ProfileIntake — gebruik gescrapte data, dan form data, dan defaults
+        # Bouw ProfileIntake vanuit form data
         intake = ProfileIntake(
             first_name=voornaam or "HR",
             last_name=achternaam or "Professional",
             email=email,
-            location=scraped.get("location") or data.get("location", "Nederland"),
+            location=data.get("location", "Nederland"),
             linkedin_url=linkedin_url,
-            current_headline=scraped.get("headline") or data.get("current_headline") or (f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else ""),
-            current_about=scraped.get("about") or data.get("current_about", "geen"),
-            current_job_title=scraped.get("job_title") or data.get("current_job_title", ""),
-            current_employer=scraped.get("employer") or data.get("current_employer", bedrijfsnaam or "Onbekend"),
+            current_headline=data.get("current_headline") or (f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else ""),
+            current_about=data.get("current_about", "geen"),
+            current_job_title=data.get("current_job_title", ""),
+            current_employer=data.get("current_employer", bedrijfsnaam or "Onbekend"),
             years_experience=data.get("years_experience", ""),
             current_job_description=data.get("current_job_description", ""),
             previous_experience=data.get("previous_experience", ""),
@@ -650,7 +637,6 @@ async def profielscore_submit(request: Request):
             current_skills=data.get("current_skills", ""),
             banner_style=data.get("banner_style", "Modern & Professioneel"),
             banner_color_preference=data.get("banner_color_preference", "Laat de agent kiezen"),
-            profile_photo_url=scraped.get("profile_photo_url"),
         )
 
         # Run analyse
