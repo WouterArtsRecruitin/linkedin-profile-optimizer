@@ -356,7 +356,10 @@ exports.handler = async (event) => {
 
   try {
     const formData = JSON.parse(event.body);
-    const { linkedin_url, email, voornaam, achternaam, telefoonnummer, bedrijfsnaam } = formData;
+    const { linkedin_url, email, voornaam, achternaam, telefoonnummer, bedrijfsnaam, linkedin_pdf_base64 } = formData;
+    if (linkedin_pdf_base64) {
+      console.log(`📄 LinkedIn PDF ontvangen (${Math.round(linkedin_pdf_base64.length * 0.75 / 1024)} KB)`);
+    }
 
     if (!linkedin_url || !email) {
       return {

@@ -117,6 +117,24 @@
                             <input type="tel" id="telefoonnummer" name="telefoonnummer" placeholder="Telefoon" />
                             <input type="text" id="bedrijfsnaam" name="bedrijfsnaam" placeholder="Bedrijfsnaam (optioneel)" />
                         </div>
+
+                        <div class="pdf-upload-section">
+                            <div class="pdf-upload-header">
+                                <span class="pdf-badge">AANBEVOLEN</span>
+                                Upload je LinkedIn PDF — voor de meest complete analyse
+                            </div>
+                            <p class="pdf-upload-hint">
+                                Open LinkedIn → jouw profiel → <strong>Meer</strong> → <strong>Opslaan als PDF</strong> (duurt 10 sec)
+                            </p>
+                            <label class="pdf-upload-dropzone" id="pdfDropzone" for="linkedin_pdf">
+                                <div class="pdf-upload-icon">📄</div>
+                                <div class="pdf-upload-text" id="pdfFileName">Sleep je PDF hierheen of klik om te kiezen</div>
+                                <div class="pdf-upload-meta">Max 5 MB · alleen .pdf</div>
+                                <input type="file" id="linkedin_pdf" name="linkedin_pdf" accept=".pdf" style="display:none" />
+                            </label>
+                            <p class="pdf-upload-note">Zonder PDF analyseren we op basis van je publieke URL — met PDF krijg je het volledige rapport.</p>
+                        </div>
+
                         <button type="submit" class="btn-primary" id="submitBtn">
                             Verstuur mijn analyse →
                         </button>
@@ -384,6 +402,55 @@
             localStorage.setItem('profielscore_submissions', JSON.stringify(submissions));
         }
 
+        // PDF upload: drag & drop + click handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropzone = document.getElementById('pdfDropzone');
+            const fileInput = document.getElementById('linkedin_pdf');
+            const fileNameEl = document.getElementById('pdfFileName');
+            if (!dropzone || !fileInput) return;
+
+            fileInput.addEventListener('change', function() {
+                handlePdfFile(this.files[0]);
+            });
+
+            dropzone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropzone.classList.add('drag-over');
+            });
+
+            dropzone.addEventListener('dragleave', function() {
+                dropzone.classList.remove('drag-over');
+            });
+
+            dropzone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    fileInput.files = e.dataTransfer.files;
+                    handlePdfFile(file);
+                }
+            });
+
+            function handlePdfFile(file) {
+                if (!file) return;
+                if (file.type !== 'application/pdf') {
+                    fileNameEl.textContent = '⚠️ Alleen PDF bestanden toegestaan';
+                    dropzone.classList.remove('has-file');
+                    fileInput.value = '';
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    fileNameEl.textContent = '⚠️ Bestand te groot (max 5 MB)';
+                    dropzone.classList.remove('has-file');
+                    fileInput.value = '';
+                    return;
+                }
+                fileNameEl.textContent = '✅ ' + file.name;
+                dropzone.classList.add('has-file');
+            }
+        });
+
         async function submitForm(e) {
             e.preventDefault();
             const linkedin_url = document.getElementById('linkedin_url').value;
@@ -392,6 +459,8 @@
             const achternaam = document.getElementById('achternaam').value;
             const telefoonnummer = document.getElementById('telefoonnummer').value;
             const bedrijfsnaam = document.getElementById('bedrijfsnaam').value;
+            const pdfInput = document.getElementById('linkedin_pdf');
+            const pdfFile = pdfInput && pdfInput.files[0] ? pdfInput.files[0] : null;
             const btn = document.getElementById('submitBtn');
             const errorEl = document.getElementById('formError');
             errorEl.style.display = 'none';
@@ -428,6 +497,17 @@
             btn.style.opacity = '0.7';
 
             try {
+                // Read PDF as base64 if uploaded
+                let pdfBase64 = null;
+                if (pdfFile) {
+                    pdfBase64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result.split(',')[1]); // strip data:...;base64,
+                        reader.onerror = reject;
+                        reader.readAsDataURL(pdfFile);
+                    });
+                }
+
                 const response = await fetch('/.netlify/functions/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -438,7 +518,8 @@
                         achternaam: achternaam || null,
                         telefoonnummer: telefoonnummer || null,
                         bedrijfsnaam: bedrijfsnaam || null,
-                        source: 'profielscore-landing'
+                        source: 'profielscore-landing',
+                        linkedin_pdf_base64: pdfBase64
                     })
                 });
 

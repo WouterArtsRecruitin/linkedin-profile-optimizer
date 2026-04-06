@@ -598,43 +598,62 @@ async def profielscore_submit(request: Request):
         achternaam = data.get("achternaam", "")
         bedrijfsnaam = data.get("bedrijfsnaam", "")
         linkedin_url = data.get("linkedin_url", "")
+        linkedin_pdf_base64 = data.get("linkedin_pdf_base64", "")
 
         print(f"\n{'='*60}")
         print(f"📨 ProfielScore submit: {email} ({linkedin_url})")
         print(f"{'='*60}")
 
+        # Parse LinkedIn PDF als die is meegestuurd
+        pdf_fields = {}
+        if linkedin_pdf_base64:
+            try:
+                import base64
+                from analyzer.pdf_parser import parse_linkedin_pdf, pdf_data_to_intake_fields
+                pdf_bytes = base64.b64decode(linkedin_pdf_base64)
+                print(f"   📄 LinkedIn PDF ontvangen ({len(pdf_bytes) // 1024} KB), parsing...")
+                pdf_data = parse_linkedin_pdf(pdf_bytes)
+                pdf_fields = pdf_data_to_intake_fields(pdf_data)
+                print(f"   ✅ PDF parsed: {pdf_data.full_name} — {pdf_data.headline}")
+                print(f"      Skills: {len(pdf_data.skills)}, Experience: {len(pdf_data.experiences)}, Education: {len(pdf_data.education)}")
+            except Exception as e:
+                print(f"   ⚠️ PDF parsing mislukt: {e} — doorgaan met form data")
+
         # Update Supabase status → "analyzing"
         if db_admin:
             try:
+                update_data = {"status": "analyzing"}
+                if pdf_fields:
+                    update_data["has_pdf"] = True
                 db_admin.table("profielscore_leads").update(
-                    {"status": "analyzing"}
+                    update_data
                 ).eq("email", email).execute()
                 print(f"   💾 Status → analyzing")
             except Exception as e:
                 print(f"   ⚠️ Supabase status update: {e}")
 
-        # Bouw ProfileIntake vanuit form data
+        # Bouw ProfileIntake: PDF data > form data > defaults
         intake = ProfileIntake(
-            first_name=voornaam or "HR",
-            last_name=achternaam or "Professional",
+            first_name=pdf_fields.get("first_name") or voornaam or "",
+            last_name=pdf_fields.get("last_name") or achternaam or "",
             email=email,
-            location=data.get("location", "Nederland"),
+            location=pdf_fields.get("location") or data.get("location", "Nederland"),
             linkedin_url=linkedin_url,
-            current_headline=data.get("current_headline") or (f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else ""),
-            current_about=data.get("current_about", "geen"),
-            current_job_title=data.get("current_job_title", ""),
-            current_employer=data.get("current_employer", bedrijfsnaam or "Onbekend"),
-            years_experience=data.get("years_experience", ""),
-            current_job_description=data.get("current_job_description", ""),
-            previous_experience=data.get("previous_experience", ""),
+            current_headline=pdf_fields.get("current_headline") or data.get("current_headline") or (f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else ""),
+            current_about=pdf_fields.get("current_about") or data.get("current_about", "geen"),
+            current_job_title=pdf_fields.get("current_job_title") or data.get("current_job_title", ""),
+            current_employer=pdf_fields.get("current_employer") or data.get("current_employer", bedrijfsnaam or "Onbekend"),
+            years_experience=pdf_fields.get("years_experience") or data.get("years_experience", ""),
+            current_job_description=pdf_fields.get("current_job_description") or data.get("current_job_description", ""),
+            previous_experience=pdf_fields.get("previous_experience") or data.get("previous_experience", ""),
             linkedin_goal=data.get("linkedin_goal", "Meer zichtbaarheid en kansen"),
             target_sector=data.get("target_sector", ""),
             target_audience=data.get("target_audience", ""),
             top_3_skills=data.get("top_3_skills", ""),
             unique_value=data.get("unique_value", ""),
-            education=data.get("education", ""),
-            certificates=data.get("certificates", ""),
-            current_skills=data.get("current_skills", ""),
+            education=pdf_fields.get("education") or data.get("education", ""),
+            certificates=pdf_fields.get("certificates") or data.get("certificates", ""),
+            current_skills=pdf_fields.get("current_skills") or data.get("current_skills", ""),
             banner_style=data.get("banner_style", "Modern & Professioneel"),
             banner_color_preference=data.get("banner_color_preference", "Laat de agent kiezen"),
         )
