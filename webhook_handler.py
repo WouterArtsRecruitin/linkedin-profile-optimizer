@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 
 from models import ProfileIntake
 from run_analysis import run_full_analysis
+from analyzer.linkedin_scraper import scrape_linkedin_profile
 from db.clay_client import ClayEnrichment
 from db.lemlist_client import LemlistClient
 from db.pipedrive_client import PipedriveClient
@@ -38,6 +39,52 @@ except Exception as e:
 # Init clients
 lemlist = LemlistClient()
 pipedrive = PipedriveClient()
+
+
+def upload_to_supabase_storage(file_path: str, bucket: str = "profielscore-assets") -> str:
+    """Upload bestand naar Supabase Storage, return public URL.
+    Gebruikt SUPABASE_SERVICE_KEY voor schrijfrechten.
+    Maakt bucket aan als deze niet bestaat.
+    """
+    if not file_path or not os.path.exists(file_path):
+        return ""
+
+    service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+    supabase_url = os.environ.get("SUPABASE_URL", "")
+    if not service_key or not supabase_url:
+        print("   ⚠️ Supabase Storage: SERVICE_KEY of URL ontbreekt")
+        return ""
+
+    try:
+        from supabase import create_client
+        storage_client = create_client(supabase_url, service_key)
+
+        # Bucket aanmaken als die niet bestaat (idempotent)
+        try:
+            storage_client.storage.create_bucket(bucket, options={"public": True})
+        except Exception:
+            pass  # Bucket bestaat al
+
+        filename = os.path.basename(file_path)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        storage_path = f"{timestamp}_{filename}"
+
+        with open(file_path, "rb") as f:
+            file_bytes = f.read()
+
+        content_type = "image/png" if filename.endswith(".png") else "text/html"
+        storage_client.storage.from_(bucket).upload(
+            storage_path, file_bytes,
+            {"content-type": content_type}
+        )
+
+        public_url = storage_client.storage.from_(bucket).get_public_url(storage_path)
+        print(f"   ✅ Storage upload: {storage_path}")
+        return public_url
+
+    except Exception as e:
+        print(f"   ⚠️ Storage upload fout: {e}")
+        return ""
 
 # ============================================================
 # FORM IDs
@@ -545,30 +592,53 @@ async def profielscore_submit(request: Request):
         print(f"📨 ProfielScore submit: {email} ({linkedin_url})")
         print(f"{'='*60}")
 
-        # Bouw ProfileIntake — gebruik opgegeven velden, defaults voor ontbrekende
+        # Update Supabase status → "analyzing"
+        if db:
+            try:
+                db.client.table("profielscore_leads").update(
+                    {"status": "analyzing"}
+                ).eq("email", email).execute()
+                print(f"   💾 Status → analyzing")
+            except Exception as e:
+                print(f"   ⚠️ Supabase status update: {e}")
+
+        # P1: Scrape LinkedIn profiel voor echte data
+        scraped = {}
+        if linkedin_url:
+            try:
+                scraped = scrape_linkedin_profile(linkedin_url)
+                if scraped:
+                    print(f"   ✅ LinkedIn data: {', '.join(scraped.keys())}")
+                else:
+                    print(f"   ⚠️ Geen LinkedIn data — defaults worden gebruikt")
+            except Exception as e:
+                print(f"   ⚠️ LinkedIn scraping fout: {e}")
+
+        # Bouw ProfileIntake — gebruik gescrapte data, dan form data, dan defaults
         intake = ProfileIntake(
             first_name=voornaam or "HR",
             last_name=achternaam or "Professional",
             email=email,
-            location=data.get("location", "Nederland"),
+            location=scraped.get("location") or data.get("location", "Nederland"),
             linkedin_url=linkedin_url,
-            current_headline=data.get("current_headline") or (f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else "HR & Recruitment Professional"),
-            current_about=data.get("current_about", "geen"),
-            current_job_title=data.get("current_job_title", "HR / Recruitment Professional"),
-            current_employer=data.get("current_employer", bedrijfsnaam or "Onbekend"),
-            years_experience=data.get("years_experience", "6-10 jaar"),
+            current_headline=scraped.get("headline") or data.get("current_headline") or (f"Professional bij {bedrijfsnaam}" if bedrijfsnaam else ""),
+            current_about=scraped.get("about") or data.get("current_about", "geen"),
+            current_job_title=scraped.get("job_title") or data.get("current_job_title", ""),
+            current_employer=scraped.get("employer") or data.get("current_employer", bedrijfsnaam or "Onbekend"),
+            years_experience=data.get("years_experience", ""),
             current_job_description=data.get("current_job_description", ""),
             previous_experience=data.get("previous_experience", ""),
-            linkedin_goal=data.get("linkedin_goal", "Meer klanten / opdrachten krijgen"),
-            target_sector=data.get("target_sector", "HR & Recruitment"),
-            target_audience=data.get("target_audience", "HR-managers en directeuren bij technische bedrijven"),
-            top_3_skills=data.get("top_3_skills", "Recruitment, Werving & Selectie, Employer Branding"),
+            linkedin_goal=data.get("linkedin_goal", "Meer zichtbaarheid en kansen"),
+            target_sector=data.get("target_sector", ""),
+            target_audience=data.get("target_audience", ""),
+            top_3_skills=data.get("top_3_skills", ""),
             unique_value=data.get("unique_value", ""),
             education=data.get("education", ""),
             certificates=data.get("certificates", ""),
-            current_skills=data.get("current_skills", "Recruitment, LinkedIn Recruiter, Employer Branding"),
+            current_skills=data.get("current_skills", ""),
             banner_style=data.get("banner_style", "Modern & Professioneel"),
             banner_color_preference=data.get("banner_color_preference", "Laat de agent kiezen"),
+            profile_photo_url=scraped.get("profile_photo_url"),
         )
 
         # Run analyse
@@ -580,10 +650,16 @@ async def profielscore_submit(request: Request):
 
         print(f"   ✅ Analyse klaar: {score}/100 (Grade {grade})")
 
+        # P5: Upload banner naar Supabase Storage (persistent URL)
+        banner_url = ""
+        if analysis.banner_png_path:
+            banner_url = upload_to_supabase_storage(analysis.banner_png_path)
+
         # Stuur rapport email via Resend
-        env_key = os.environ.get("RESEND_API_KEY", "")
-        resend_api_key = env_key if env_key.startswith("re_") else "re_VFP9be65_JW7HUJDZV9Vzz4oSwpKANNaW"
-        print(f"   🔑 Resend key source: {'env' if env_key.startswith('re_') else 'fallback'}")
+        resend_api_key = os.environ.get("RESEND_API_KEY", "")
+        if not resend_api_key:
+            print("   ❌ RESEND_API_KEY niet geconfigureerd — rapport email overgeslagen")
+            return JSONResponse(content={"status": "error", "message": "RESEND_API_KEY not configured"}, status_code=500)
 
         score_color = "#16a34a" if score >= 70 else "#d97706" if score >= 50 else "#dc2626"
         score_label = "Goed" if score >= 70 else "Verbetering mogelijk" if score >= 50 else "Verbetering nodig"
@@ -637,6 +713,7 @@ async def profielscore_submit(request: Request):
             <h3 style="color:#1a1a2e;margin:0 0 20px;">✅ Jouw Actieplan</h3>
             {action_html}
           </div>
+          {'<div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;text-align:center;"><h3 style="color:#1a1a2e;margin:0 0 16px;">🎨 Jouw LinkedIn Banner</h3><p style="color:#4a5568;font-size:14px;margin:0 0 16px;">Klik om te downloaden en upload naar LinkedIn (Profiel → Achtergrond bewerken):</p><a href="' + banner_url + '" target="_blank"><img src="' + banner_url + '" style="width:100%;max-width:560px;border-radius:8px;border:1px solid #e5e7eb;" alt="LinkedIn Banner"/></a></div>' if banner_url else ''}
           <div style="padding:40px;text-align:center;background:#fafafa;">
             <p style="color:#4a5568;margin:0 0 24px;">Vragen of hulp bij implementatie?</p>
             <a href="mailto:wouter.arts@recruitin.nl" style="display:inline-block;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;">Neem contact op</a>
@@ -657,6 +734,30 @@ async def profielscore_submit(request: Request):
         })
         print(f"   ✅ Rapport email verstuurd: {send_result}")
 
+        # P6: Deliver to Lemlist + Pipedrive (qualified leads)
+        try:
+            deliver_report(
+                email=email,
+                name=naam,
+                linkedin_url=linkedin_url,
+                score=score,
+                grade=grade,
+                report_path="",  # rapport is inline email
+                banner_path=banner_url,  # public URL i.p.v. lokaal pad
+            )
+        except Exception as e:
+            print(f"   ⚠️ deliver_report fout (non-blocking): {e}")
+
+        # P3: Update Supabase status → "completed"
+        if db:
+            try:
+                db.client.table("profielscore_leads").update(
+                    {"status": "completed"}
+                ).eq("email", email).execute()
+                print(f"   💾 Status → completed")
+            except Exception as e:
+                print(f"   ⚠️ Supabase status update: {e}")
+
         return JSONResponse(content={
             "status": "success",
             "email": email,
@@ -668,6 +769,16 @@ async def profielscore_submit(request: Request):
         print(f"❌ ProfielScore Submit Error: {str(e)}")
         import traceback
         traceback.print_exc()
+
+        # P3: Update Supabase status → "failed"
+        if db:
+            try:
+                db.client.table("profielscore_leads").update(
+                    {"status": "failed"}
+                ).eq("email", data.get("email", "")).execute()
+            except Exception:
+                pass
+
         raise HTTPException(status_code=500, detail=str(e))
 
 

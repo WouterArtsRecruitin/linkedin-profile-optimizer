@@ -231,30 +231,77 @@ async function sendConfirmationEmail(formData) {
 }
 
 /**
- * Fire-and-forget: trigger Render analyse + rapport email
- * Geen await — Netlify function wacht niet op Render response
+ * Wake up Render service (free tier sleeps after 15min inactivity).
+ * Returns a promise that resolves when Render responds to GET /health.
+ * Times out after 45s (cold start can take 30s).
  */
-function triggerRenderAnalysis(formData) {
-  const body = JSON.stringify(formData);
-  const req = https.request({
-    hostname: 'linkedin-profile-optimizer-api.onrender.com',
-    port: 443,
-    path: '/profielscore-submit',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(body)
-    },
-    timeout: 300000 // 5 min timeout op Render zijde
-  }, (res) => {
-    let data = '';
-    res.on('data', chunk => data += chunk);
-    res.on('end', () => console.log(`📊 Render analyse klaar: ${res.statusCode} - ${data.substring(0, 100)}`))
+function wakeUpRender() {
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'linkedin-profile-optimizer-api.onrender.com',
+      port: 443,
+      path: '/',
+      method: 'GET',
+      timeout: 45000
+    }, (res) => {
+      res.on('data', () => {});
+      res.on('end', () => {
+        console.log(`🏓 Render wake-up: ${res.statusCode}`);
+        resolve(true);
+      });
+    });
+    req.on('error', (err) => {
+      console.warn(`⚠️  Render wake-up fout: ${err.message}`);
+      resolve(false);
+    });
+    req.on('timeout', () => {
+      console.warn('⚠️  Render wake-up timeout (45s)');
+      req.destroy();
+      resolve(false);
+    });
+    req.end();
   });
-  req.on('error', (err) => console.warn(`⚠️  Render analyse fout: ${err.message}`));
-  req.write(body);
-  req.end();
-  console.log('🚀 Render analyse getriggerd (async)');
+}
+
+/**
+ * Trigger Render analyse + rapport email.
+ * Eerst wake-up ping (await), dan POST (fire-and-forget).
+ * Bij fout: 1x retry na 5s.
+ */
+async function triggerRenderAnalysis(formData) {
+  // Wake up Render first (cold start protection)
+  await wakeUpRender();
+
+  const sendAnalysis = (attempt) => {
+    const body = JSON.stringify(formData);
+    const req = https.request({
+      hostname: 'linkedin-profile-optimizer-api.onrender.com',
+      port: 443,
+      path: '/profielscore-submit',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body)
+      },
+      timeout: 300000
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => console.log(`📊 Render analyse klaar (poging ${attempt}): ${res.statusCode} - ${data.substring(0, 100)}`));
+    });
+    req.on('error', (err) => {
+      console.warn(`⚠️  Render analyse fout (poging ${attempt}): ${err.message}`);
+      if (attempt === 1) {
+        console.log('🔄 Retry over 5s...');
+        setTimeout(() => sendAnalysis(2), 5000);
+      }
+    });
+    req.write(body);
+    req.end();
+    console.log(`🚀 Render analyse getriggerd (poging ${attempt})`);
+  };
+
+  sendAnalysis(1);
 }
 
 /**
@@ -340,8 +387,9 @@ exports.handler = async (event) => {
     // Step 2: Send immediate confirmation email
     await sendConfirmationEmail(formData);
 
-    // Step 3: Fire-and-forget → Render analyse + rapport email (async, geen wachten)
-    triggerRenderAnalysis(formData);
+    // Step 3: Wake up Render + fire-and-forget analyse
+    // Wake-up wordt gewacht (cold start protection), POST is fire-and-forget
+    await triggerRenderAnalysis(formData);
 
     // Step 4: Add to Lemlist campaign (non-blocking)
     const lemlistResult = await addToLemlistCampaign(formData);
