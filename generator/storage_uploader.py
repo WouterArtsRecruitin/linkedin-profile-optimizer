@@ -61,13 +61,25 @@ def upload_bytes(
 
 
 def upload_rapport(html_content: str, lead_name: str) -> str:
-    """Upload hosted rapport HTML, return public URL."""
-    return upload_bytes(
+    """Upload hosted rapport HTML, return Netlify proxy URL.
+    Supabase Storage serves HTML as text/plain (XSS prevention),
+    so we route through a Netlify function that sets text/html.
+    """
+    # Upload to Supabase Storage
+    date_prefix = datetime.now().strftime("%Y%m%d")
+    safe = _safe_name(lead_name)
+    storage_path = f"{date_prefix}/{safe}/rapport.html"
+
+    upload_bytes(
         data=html_content.encode("utf-8"),
         filename="rapport.html",
         content_type="text/html; charset=utf-8",
         lead_name=lead_name,
     )
+
+    # Return Netlify proxy URL instead of direct Supabase URL
+    netlify_base = os.environ.get("NETLIFY_URL", "https://profielscore.netlify.app")
+    return f"{netlify_base}/.netlify/functions/rapport?path={storage_path}"
 
 
 def upload_image(image_bytes: bytes, lead_name: str, filename: str = "mockup.png") -> str:
