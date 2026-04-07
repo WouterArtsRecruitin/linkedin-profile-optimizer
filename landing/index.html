@@ -125,12 +125,12 @@
                             <p class="pdf-upload-hint">
                                 Open LinkedIn → jouw profiel → <strong>Meer</strong> → <strong>Opslaan als PDF</strong> (duurt 10 sec)
                             </p>
-                            <label class="pdf-upload-dropzone" id="pdfDropzone" for="linkedin_pdf">
+                            <input type="file" id="linkedin_pdf" name="linkedin_pdf" accept=".pdf" style="display:none" />
+                            <div class="pdf-upload-dropzone" id="pdfDropzone" onclick="document.getElementById('linkedin_pdf').click()">
                                 <div class="pdf-upload-icon">📄</div>
                                 <div class="pdf-upload-text" id="pdfFileName">Sleep je PDF hierheen of klik om te kiezen</div>
                                 <div class="pdf-upload-meta">Max 5 MB · alleen .pdf</div>
-                                <input type="file" id="linkedin_pdf" name="linkedin_pdf" accept=".pdf" style="display:none" />
-                            </label>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn-primary" id="submitBtn">
