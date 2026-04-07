@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfielScore Rapport — {{ name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07050f;
+            --surface: #0f0b1a;
+            --card: #161224;
+            --orange: #FF5500;
+            --magenta: #ff00cc;
+            --text: #f2eeff;
+            --muted: #7a7290;
+            --border: #2a2440;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg) 0%, #1a0f2e 50%, var(--bg) 100%);
+            padding: 48px 24px 64px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,0,204,0.15), transparent 70%);
+            border-radius: 50%;
+        }
+        .header-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--orange);
+            margin-bottom: 16px;
+        }
+        .header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .header .subtitle {
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+        /* Score hero */
+        .score-hero {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 40px;
+            margin: -32px auto 32px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        .score-ring {
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .score-ring::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            padding: 4px;
+            background: conic-gradient({{ score_color }} {{ score_pct }}%, var(--border) {{ score_pct }}%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        .score-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 56px;
+            font-weight: 900;
+            color: {{ score_color }};
+        }
+        .score-grade {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+        .score-meta h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .score-meta p { color: var(--muted); font-size: 15px; }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .accent {
+            color: var(--orange);
+        }
+
+        /* Score bars */
+        .bar-row { margin-bottom: 16px; }
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .bar-track {
+            height: 8px;
+            background: var(--card);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        .bar-suggestion {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+            padding-left: 16px;
+        }
+
+        /* Headlines */
+        .headline-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .headline-card.recommended {
+            border-color: var(--orange);
+            background: rgba(255, 85, 0, 0.05);
+        }
+        .headline-badge {
+            position: absolute;
+            top: -10px; right: 16px;
+            background: var(--orange);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+        .headline-style {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .headline-text {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .headline-explain {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* About */
+        .about-box {
+            background: rgba(34, 197, 94, 0.06);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-line;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover { background: var(--border); }
+
+        /* SEO Pills */
+        .pill-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pill {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .pill-high {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+        .pill-where {
+            font-size: 11px;
+            color: var(--muted);
+            margin-left: 6px;
+        }
+
+        /* Action items */
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .action-item:last-child { border-bottom: none; }
+        .action-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--orange);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .action-text { font-size: 14px; padding-top: 5px; }
+
+        /* Experience */
+        .exp-block { margin-bottom: 24px; }
+        .exp-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .exp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .exp-before {
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 13px;
+            white-space: pre-line;
+        }
+        .exp-after {
+            background: rgba(34, 197, 94, 0.06);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 13px;
+            white-space: pre-line;
+        }
+        .exp-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        /* Mockup */
+        .mockup-frame {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .mockup-frame img {
+            width: 100%;
+            display: block;
+        }
+
+        /* CTA Footer */
+        .cta-footer {
+            background: linear-gradient(135deg, #1a0f2e, var(--surface));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px 40px;
+            text-align: center;
+            margin: 32px 0 48px;
+        }
+        .cta-footer h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        .cta-footer p {
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+        .cta-btn {
+            display: inline-block;
+            background: var(--orange);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        .cta-btn:hover { transform: translateY(-2px); }
+
+        .footer-note {
+            text-align: center;
+            padding: 24px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* Print */
+        @media print {
+            body { background: white; color: #1e293b; }
+            .card { border-color: #e2e8f0; background: white; }
+            .header { background: #0a66c2; }
+            .copy-btn { display: none; }
+            .cta-footer { display: none; }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .score-hero { flex-direction: column; text-align: center; padding: 32px 24px; }
+            .exp-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-logo">ProfielScore</div>
+        <h1>LinkedIn Rapport</h1>
+        <p class="subtitle">{{ name }} — {{ job_title }}</p>
+    </div>
+
+    <div class="container">
+
+        <!-- Score -->
+        <div class="score-hero">
+            <div class="score-ring">
+                <div class="score-number">{{ total_score }}</div>
+                <div class="score-grade">{{ grade }}</div>
+            </div>
+            <div class="score-meta">
+                <h2>{{ score_label }}</h2>
+                <p>{{ score_summary }}</p>
+            </div>
+        </div>
+
+        <!-- Score Breakdown -->
+        <div class="card">
+            <div class="card-title"><span class="accent">Score</span> Breakdown</div>
+            {% for cat in categories %}
+            <div class="bar-row">
+                <div class="bar-label">
+                    <span>{{ cat.name }}</span>
+                    <span>{{ cat.score }}/{{ cat.max_score }}</span>
+                </div>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width:{{ cat.pct }}%; background:{{ cat.color }};"></div>
+                </div>
+                {% for sug in cat.suggestions %}
+                <div class="bar-suggestion">{{ sug }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Headlines -->
+        <div class="card">
+            <div class="card-title"><span class="accent">Verbeterde</span> Headlines</div>
+            <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">
+                Huidige headline: <span style="color:var(--red);">{{ current_headline }}</span>
+            </p>
+            {% for hl in headlines %}
+            <div class="headline-card{% if loop.first %} recommended{% endif %}">
+                {% if loop.first %}<div class="headline-badge">AANBEVOLEN</div>{% endif %}
+                <div class="headline-style">{{ hl.style }}</div>
+                <div class="headline-text">{{ hl.text }}</div>
+                <div class="headline-explain">{{ hl.explanation }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- About -->
+        {% if about_text %}
+        <div class="card">
+            <div class="card-title"><span class="accent">Herschreven</span> Over Mij</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+                StoryBrand SB7 Framework — kopieer naar je LinkedIn profiel
+            </p>
+            <div class="about-box">
+                <button class="copy-btn" onclick="copyAbout()">Kopieer tekst</button>
+                <div id="about-content">{{ about_text }}</div>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin-top:8px;">{{ about_word_count }} woorden</p>
+        </div>
+        {% endif %}
+
+        <!-- SEO Keywords -->
+        {% if keywords %}
+        <div class="card">
+            <div class="card-title"><span class="accent">SEO</span> Keywords</div>
+            <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">
+                Voeg deze keywords toe aan je profiel voor betere vindbaarheid
+            </p>
+            <div class="pill-grid">
+                {% for kw in keywords %}
+                <span class="pill{% if kw.relevance_score >= 9 %} pill-high{% endif %}">
+                    {{ kw.keyword }}
+                    <span class="pill-where">{{ kw.where_to_add }}</span>
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Experience -->
+        {% if experiences %}
+        <div class="card">
+            <div class="card-title"><span class="accent">Verbeterde</span> Werkervaring</div>
+            {% for exp in experiences %}
+            <div class="exp-block">
+                <div class="exp-header">{{ exp.company }} — {{ exp.title }}</div>
+                <div class="exp-grid">
+                    <div class="exp-before">
+                        <div class="exp-label" style="color:var(--red);">VOOR</div>
+                        {{ exp.original_description or '(leeg)' }}
+                    </div>
+                    <div class="exp-after">
+                        <div class="exp-label" style="color:var(--green);">NA</div>
+                        {{ exp.improved_description }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Actieplan -->
+        {% if actions %}
+        <div class="card">
+            <div class="card-title"><span class="accent">Actie</span>plan</div>
+            {% for action in actions %}
+            <div class="action-item">
+                <div class="action-num">{{ loop.index }}</div>
+                <div class="action-text">{{ action }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Mockup -->
+        {% if mockup_url %}
+        <div class="card">
+            <div class="card-title"><span class="accent">LinkedIn</span> Mockup</div>
+            <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">
+                Zo ziet je profiel eruit na de optimalisatie
+            </p>
+            <div class="mockup-frame">
+                <img src="{{ mockup_url }}" alt="LinkedIn profiel mockup">
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- CTA -->
+        <div class="cta-footer">
+            <h2>Hulp nodig bij de implementatie?</h2>
+            <p>Plan een gratis gesprek en we helpen je profiel live te optimaliseren.</p>
+            <a href="mailto:wouter@recruitin.nl?subject=ProfielScore%20opvolging%20-%20{{ name }}" class="cta-btn">Plan een gesprek</a>
+        </div>
+
+        <div class="footer-note">
+            &copy; {{ year }} Recruitin — ProfielScore LinkedIn Optimalisatie<br>
+            <a href="https://profielscore.nl" style="color:var(--orange);">profielscore.nl</a>
+        </div>
+    </div>
+
+    <script>
+    function copyAbout() {
+        const el = document.getElementById('about-content');
+        const text = el.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = 'Gekopieerd!';
+            setTimeout(() => btn.textContent = 'Kopieer tekst', 2000);
+        });
+    }
+    </script>
+</body>
+</html>

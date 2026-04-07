@@ -683,134 +683,55 @@ async def profielscore_submit(request: Request):
             print("   ❌ RESEND_API_KEY niet geconfigureerd — rapport email overgeslagen")
             return JSONResponse(content={"status": "error", "message": "RESEND_API_KEY not configured"}, status_code=500)
 
-        score_color = "#16a34a" if score >= 70 else "#f59e0b" if score >= 50 else "#ef4444"
-        score_label = "Sterk profiel" if score >= 70 else "Ruimte voor groei" if score >= 50 else "Veel potentieel"
+        # === Generate mockup image ===
+        mockup_url = ""
+        try:
+            from generator.mockup_image_builder import build_mockup_image
+            mockup_bytes = build_mockup_image(analysis)
+            print(f"   ✅ Mockup PNG gegenereerd ({len(mockup_bytes) // 1024} KB)")
 
-        # Score breakdown per categorie
-        breakdown_html = ""
-        for cat in analysis.score.categories:
-            pct = int((cat.score / cat.max_score) * 100)
-            bar_color = "#16a34a" if pct >= 70 else "#f59e0b" if pct >= 50 else "#ef4444"
-            breakdown_html += (
-                f'<tr>'
-                f'<td style="padding:8px 0;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">{cat.name}</td>'
-                f'<td style="padding:8px 0;border-bottom:1px solid #f3f4f6;width:50%;">'
-                f'<div style="background:#f3f4f6;border-radius:4px;height:8px;overflow:hidden;">'
-                f'<div style="background:{bar_color};height:8px;width:{pct}%;border-radius:4px;"></div></div></td>'
-                f'<td style="padding:8px 0 8px 12px;font-size:13px;font-weight:600;color:{bar_color};border-bottom:1px solid #f3f4f6;text-align:right;">{cat.score}/{cat.max_score}</td>'
-                f'</tr>'
-            )
+            from generator.storage_uploader import upload_image
+            mockup_url = upload_image(mockup_bytes, naam, "mockup.png")
+        except Exception as e:
+            print(f"   ⚠️ Mockup generatie: {e}")
 
-        # Headline opties
-        headline_html = ""
-        for i, h in enumerate(analysis.headline_options[:3]):
-            badge = '<span style="display:inline-block;background:#16a34a;color:#fff;font-size:10px;padding:2px 8px;border-radius:3px;margin-left:8px;vertical-align:middle;">AANBEVOLEN</span>' if i == 0 else ''
-            headline_html += (
-                f'<div style="background:#f8fafc;border:1px solid #e2e8f0;padding:16px;border-radius:8px;margin-bottom:10px;">'
-                f'<p style="margin:0 0 6px;font-size:11px;color:#6366f1;font-weight:700;text-transform:uppercase;">{h.style}{badge}</p>'
-                f'<p style="margin:0;color:#1e293b;font-size:15px;font-weight:500;">{h.text}</p></div>'
-            )
+        # === Upload banner if available ===
+        banner_url = ""
+        if hasattr(analysis, 'banner_png_path') and analysis.banner_png_path:
+            try:
+                from generator.storage_uploader import upload_file
+                banner_url = upload_file(analysis.banner_png_path, naam)
+            except Exception as e:
+                print(f"   ⚠️ Banner upload: {e}")
 
-        # Herschreven Over Mij sectie
-        about_html = ""
-        if analysis.improved_about and analysis.improved_about.full_text:
-            about_text = analysis.improved_about.full_text.replace("\n", "<br>")
-            about_html = f"""
-            <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
-              <h3 style="color:#1e293b;margin:0 0 8px;font-size:18px;">Herschreven 'Over Mij'</h3>
-              <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Kopieer deze tekst naar je LinkedIn profiel:</p>
-              <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:20px;border-radius:8px;font-size:14px;color:#1e293b;line-height:1.7;">{about_text}</div>
-            </div>"""
+        # === Generate hosted rapport HTML → upload to Supabase Storage ===
+        rapport_url = ""
+        try:
+            from generator.report_builder import build_hosted_rapport, build_email_summary
+            hosted_html = build_hosted_rapport(analysis, mockup_url=mockup_url)
 
-        # SEO keywords
-        keywords_html = "".join([
-            f'<span style="display:inline-block;background:#eef2ff;color:#4338ca;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;margin:3px;">{k.keyword}</span>'
-            for k in analysis.seo_keywords[:8]
-        ])
+            from generator.storage_uploader import upload_rapport
+            rapport_url = upload_rapport(hosted_html, naam)
+            print(f"   ✅ Hosted rapport: {rapport_url}")
+        except Exception as e:
+            print(f"   ⚠️ Hosted rapport: {e}")
 
-        # Actieplan
-        action_html = ""
-        for i, item in enumerate(analysis.action_items[:5]):
-            action_html += (
-                f'<div style="display:flex;align-items:flex-start;margin-bottom:14px;">'
-                f'<div style="background:#6366f1;color:#fff;border-radius:50%;min-width:28px;height:28px;line-height:28px;text-align:center;font-size:13px;font-weight:700;margin-right:14px;flex-shrink:0;">{i+1}</div>'
-                f'<p style="margin:0;color:#374151;font-size:14px;line-height:1.6;padding-top:4px;">{item}</p></div>'
-            )
+        # === Build email summary ===
+        try:
+            email_html = build_email_summary(analysis, rapport_url=rapport_url, mockup_url=mockup_url)
+        except Exception as e:
+            print(f"   ⚠️ Email template fout, fallback: {e}")
+            email_html = f"<p>Je ProfielScore: {score}/100. Bekijk je rapport: <a href='{rapport_url}'>{rapport_url}</a></p>"
 
-        html_body = f"""
-        <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;color:#1e293b;background:#ffffff;">
-          <!-- Header -->
-          <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:40px;text-align:center;">
-            <h1 style="color:#fff;margin:0 0 4px;font-size:24px;font-weight:300;letter-spacing:2px;">PROFIELSCORE</h1>
-            <p style="color:#94a3b8;margin:0;font-size:13px;">LinkedIn Profiel Analyse</p>
-          </div>
-
-          <!-- Score -->
-          <div style="padding:40px;text-align:center;border-bottom:1px solid #f1f5f9;">
-            <div style="display:inline-block;width:120px;height:120px;border-radius:50%;border:4px solid {score_color};line-height:120px;margin:0 auto;">
-              <span style="color:{score_color};font-size:48px;font-weight:700;">{score}</span>
-            </div>
-            <p style="color:#64748b;margin:10px 0 0;font-size:13px;">van de 100 punten</p>
-            <p style="color:{score_color};font-size:16px;font-weight:600;margin:6px 0 0;">{score_label}</p>
-          </div>
-
-          <!-- Intro -->
-          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
-            <p style="color:#374151;line-height:1.7;margin:0;font-size:15px;">
-              Hoi {first}, hieronder vind je jouw persoonlijke LinkedIn analyse met concrete verbeterpunten die je direct kunt toepassen.
-            </p>
-          </div>
-
-          <!-- Score Breakdown -->
-          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
-            <h3 style="color:#1e293b;margin:0 0 16px;font-size:16px;">Score per categorie</h3>
-            <table style="width:100%;border-collapse:collapse;">{breakdown_html}</table>
-          </div>
-
-          <!-- Headlines -->
-          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
-            <h3 style="color:#1e293b;margin:0 0 16px;font-size:16px;">Nieuwe headline opties</h3>
-            <p style="color:#64748b;font-size:13px;margin:0 0 14px;">Huidige: <em style="color:#94a3b8;">{intake.current_headline[:80]}...</em></p>
-            {headline_html}
-          </div>
-
-          <!-- About rewrite -->
-          {about_html}
-
-          <!-- SEO Keywords -->
-          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
-            <h3 style="color:#1e293b;margin:0 0 8px;font-size:16px;">Ontbrekende SEO keywords</h3>
-            <p style="color:#64748b;font-size:13px;margin:0 0 14px;">Verwerk deze in je headline, about en ervaring:</p>
-            <div>{keywords_html}</div>
-          </div>
-
-          <!-- Actieplan -->
-          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
-            <h3 style="color:#1e293b;margin:0 0 16px;font-size:16px;">Jouw actieplan</h3>
-            {action_html}
-          </div>
-
-          <!-- CTA -->
-          <div style="padding:36px 40px;text-align:center;background:#f8fafc;">
-            <p style="color:#374151;margin:0 0 6px;font-size:15px;font-weight:600;">Hulp nodig bij de implementatie?</p>
-            <p style="color:#64748b;margin:0 0 20px;font-size:13px;">We helpen je profiel optimaliseren zodat techtalent jou vindt.</p>
-            <a href="mailto:wouter.arts@recruitin.nl" style="display:inline-block;background:#6366f1;color:#fff;padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;">Plan een gesprek</a>
-          </div>
-
-          <!-- Footer -->
-          <div style="padding:20px 40px;text-align:center;">
-            <p style="color:#94a3b8;font-size:11px;margin:0;">profielscore.nl — Recruitin B.V. | Doesburg</p>
-          </div>
-        </div>
-        """
-
+        # === Send rapport email via Resend ===
         import resend as resend_lib
         resend_lib.api_key = resend_api_key
+        score_label = "Sterk profiel" if score >= 70 else "Ruimte voor groei" if score >= 50 else "Veel potentieel"
         send_result = resend_lib.Emails.send({
             "from": "ProfielScore <noreply@kandidatentekort.nl>",
             "to": [email],
-            "subject": f"Je ProfielScore Rapport - {score}/100 (Grade {grade})",
-            "html": html_body
+            "subject": f"Je ProfielScore: {score}/100 — {score_label}",
+            "html": email_html,
         })
         print(f"   ✅ Rapport email verstuurd: {send_result}")
 
@@ -822,19 +743,24 @@ async def profielscore_submit(request: Request):
                 linkedin_url=linkedin_url,
                 score=score,
                 grade=grade,
-                report_path="",  # rapport is inline email
-                banner_path=banner_url,  # public URL i.p.v. lokaal pad
+                report_path=rapport_url,
+                banner_path=banner_url,
             )
         except Exception as e:
             print(f"   ⚠️ deliver_report fout (non-blocking): {e}")
 
-        # P3: Update Supabase status → "completed"
+        # P3: Update Supabase status → "completed" + store URLs
         if db_admin:
             try:
-                db_admin.table("profielscore_leads").update(
-                    {"status": "completed"}
-                ).eq("email", email).execute()
-                print(f"   💾 Status → completed")
+                db_admin.table("profielscore_leads").update({
+                    "status": "completed",
+                    "score": score,
+                    "grade": grade,
+                    "rapport_url": rapport_url,
+                    "mockup_url": mockup_url,
+                    "banner_url": banner_url,
+                }).eq("email", email).execute()
+                print(f"   💾 Status → completed (score={score}, grade={grade})")
             except Exception as e:
                 print(f"   ⚠️ Supabase status update: {e}")
 

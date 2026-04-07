@@ -186,10 +186,6 @@ def _generate_action_items(intake, score, keywords) -> list:
     elif any(c.name == "Over Mij / About" and c.score < 8 for c in score.categories):
         actions.append("Update je 'Over mij' met de verbeterde versie")
 
-    # Banner
-    if any(c.name == "Banner" and c.score < 6 for c in score.categories):
-        actions.append("Upload de nieuwe banner naar je LinkedIn profiel (Profiel → Achtergrond bewerken)")
-
     # Skills
     missing_skills = [kw.keyword for kw in keywords if kw.where_to_add == "skills"]
     if missing_skills:

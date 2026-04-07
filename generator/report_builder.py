@@ -1,13 +1,147 @@
 """
 Report Builder
-Genereert het volledige HTML analyse rapport met score, verbeteringen en mockup.
+Genereert hosted rapport HTML en email summary via Jinja2 templates.
 """
 
 import os
+import re
 import sys
+from datetime import datetime
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from jinja2 import Environment, FileSystemLoader
 from models import ProfileAnalysis
+
+# Jinja2 environment
+_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
+_jinja_env = Environment(loader=FileSystemLoader(_TEMPLATE_DIR), autoescape=False)
+
+
+def _score_color(pct: float) -> str:
+    if pct >= 70:
+        return "#22c55e"
+    elif pct >= 50:
+        return "#eab308"
+    elif pct >= 30:
+        return "#f97316"
+    return "#ef4444"
+
+
+def _score_label(score: int) -> str:
+    if score >= 80:
+        return "Sterk profiel"
+    elif score >= 60:
+        return "Goed, met ruimte voor groei"
+    elif score >= 40:
+        return "Veel potentieel"
+    return "Profiel heeft aandacht nodig"
+
+
+def _build_categories(score) -> list:
+    cats = []
+    for cat in score.categories:
+        pct = int((cat.score / cat.max_score) * 100) if cat.max_score else 0
+        cats.append({
+            "name": cat.name,
+            "score": cat.score,
+            "max_score": cat.max_score,
+            "pct": pct,
+            "color": _score_color(pct),
+            "suggestions": cat.suggestions or [],
+        })
+    return cats
+
+
+def _md_to_html(text: str) -> str:
+    """Convert markdown bold to HTML strong tags."""
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+    return text.replace("\n", "<br>")
+
+
+def build_hosted_rapport(analysis: ProfileAnalysis, mockup_url: str = "") -> str:
+    """Render hosted rapport HTML via Jinja2 template."""
+    score = analysis.score
+    intake = analysis.intake
+    total = score.total_score
+    categories = _build_categories(score)
+
+    about_text = ""
+    about_word_count = 0
+    if analysis.improved_about and analysis.improved_about.full_text:
+        about_text = _md_to_html(analysis.improved_about.full_text)
+        about_word_count = analysis.improved_about.word_count
+
+    template = _jinja_env.get_template("hosted_rapport.html")
+    return template.render(
+        name=intake.full_name,
+        job_title=intake.current_job_title or "",
+        total_score=total,
+        grade=score.grade,
+        score_color=_score_color(total),
+        score_pct=total,
+        score_label=_score_label(total),
+        score_summary=score.summary or "",
+        categories=categories,
+        current_headline=intake.current_headline or "",
+        headlines=[
+            {"style": h.style, "text": h.text, "explanation": h.explanation}
+            for h in (analysis.headline_options or [])
+        ],
+        about_text=about_text,
+        about_word_count=about_word_count,
+        keywords=[
+            {"keyword": k.keyword, "relevance_score": k.relevance_score, "where_to_add": k.where_to_add}
+            for k in (analysis.seo_keywords or [])
+        ],
+        experiences=[
+            {
+                "company": e.company, "title": e.title,
+                "original_description": e.original_description or "(leeg)",
+                "improved_description": e.improved_description,
+            }
+            for e in (analysis.improved_experiences or [])
+        ],
+        actions=analysis.action_items or [],
+        mockup_url=mockup_url,
+        year=datetime.now().year,
+    )
+
+
+def build_email_summary(
+    analysis: ProfileAnalysis,
+    rapport_url: str = "",
+    mockup_url: str = "",
+) -> str:
+    """Render premium email summary via Jinja2 template."""
+    score = analysis.score
+    intake = analysis.intake
+    total = score.total_score
+    categories = _build_categories(score)
+
+    # Top 3 categories sorted by weight
+    top_cats = sorted(categories, key=lambda c: c["pct"])[:3]
+
+    recommended = None
+    if analysis.headline_options:
+        h = analysis.headline_options[0]
+        recommended = {"text": h.text, "explanation": h.explanation}
+
+    # Short summary (first sentence)
+    summary_short = (score.summary or "").split(".")[0] + "." if score.summary else ""
+
+    template = _jinja_env.get_template("email_rapport.html")
+    return template.render(
+        name=intake.full_name,
+        total_score=total,
+        score_color=_score_color(total),
+        score_label=_score_label(total),
+        score_summary_short=summary_short,
+        top_categories=top_cats,
+        recommended_headline=recommended,
+        mockup_url=mockup_url,
+        rapport_url=rapport_url,
+    )
 
 
 def build_report(analysis: ProfileAnalysis, output_dir: str = "./output") -> str:

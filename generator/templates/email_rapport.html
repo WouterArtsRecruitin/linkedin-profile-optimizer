@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Je ProfielScore Rapport</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f2f7;font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;">
+
+<!-- Wrapper -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f2f7;">
+<tr><td align="center" style="padding:32px 16px;">
+
+<!-- Main card -->
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+    <!-- Header -->
+    <tr>
+        <td style="background:linear-gradient(135deg,#07050f 0%,#1a0f2e 100%);padding:36px 40px;text-align:center;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr><td style="font-size:12px;font-weight:bold;letter-spacing:3px;color:#FF5500;text-transform:uppercase;padding-bottom:12px;">PROFIELSCORE</td></tr>
+                <tr><td style="font-size:26px;font-weight:bold;color:#f2eeff;padding-bottom:4px;">Je LinkedIn Rapport</td></tr>
+                <tr><td style="font-size:14px;color:#7a7290;">{{ name }}</td></tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Score section -->
+    <tr>
+        <td style="padding:32px 40px 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <!-- Score circle -->
+                    <td width="120" valign="top">
+                        <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="width:100px;height:100px;border-radius:50%;border:4px solid {{ score_color }};text-align:center;vertical-align:middle;">
+                                    <span style="font-size:42px;font-weight:bold;color:{{ score_color }};display:block;line-height:1;">{{ total_score }}</span>
+                                    <span style="font-size:12px;color:#64748b;">/ 100</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <!-- Score info -->
+                    <td style="padding-left:24px;vertical-align:top;">
+                        <div style="font-size:20px;font-weight:bold;color:#1e293b;margin-bottom:4px;">{{ score_label }}</div>
+                        <div style="font-size:14px;color:#64748b;line-height:1.5;">{{ score_summary_short }}</div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Top 3 categories -->
+    <tr>
+        <td style="padding:0 40px 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                {% for cat in top_categories %}
+                <tr>
+                    <td style="padding:12px 16px;{% if not loop.last %}border-bottom:1px solid #f0f0f0;{% endif %}">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="font-size:13px;font-weight:600;color:#1e293b;">{{ cat.name }}</td>
+                                <td width="80" style="text-align:right;font-size:13px;font-weight:600;color:{{ cat.color }};">{{ cat.score }}/{{ cat.max_score }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding-top:6px;">
+                                    <div style="height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;">
+                                        <div style="height:100%;width:{{ cat.pct }}%;background:{{ cat.color }};border-radius:3px;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+    </tr>
+
+    <!-- Divider -->
+    <tr><td style="padding:0 40px;"><div style="border-top:1px solid #f0f0f0;"></div></td></tr>
+
+    <!-- Recommended headline -->
+    {% if recommended_headline %}
+    <tr>
+        <td style="padding:24px 40px;">
+            <div style="font-size:11px;font-weight:bold;letter-spacing:1px;color:#FF5500;text-transform:uppercase;margin-bottom:8px;">AANBEVOLEN HEADLINE</div>
+            <div style="font-size:17px;font-weight:bold;color:#1e293b;margin-bottom:6px;">{{ recommended_headline.text }}</div>
+            <div style="font-size:13px;color:#64748b;">{{ recommended_headline.explanation }}</div>
+        </td>
+    </tr>
+    {% endif %}
+
+    <!-- Divider -->
+    <tr><td style="padding:0 40px;"><div style="border-top:1px solid #f0f0f0;"></div></td></tr>
+
+    <!-- Mockup preview -->
+    {% if mockup_url %}
+    <tr>
+        <td style="padding:24px 40px;">
+            <div style="font-size:11px;font-weight:bold;letter-spacing:1px;color:#FF5500;text-transform:uppercase;margin-bottom:12px;">JOUW GEOPTIMALISEERDE PROFIEL</div>
+            <img src="{{ mockup_url }}" alt="LinkedIn mockup" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;">
+        </td>
+    </tr>
+    {% endif %}
+
+    <!-- CTA Button -->
+    <tr>
+        <td style="padding:24px 40px 32px;text-align:center;">
+            <a href="{{ rapport_url }}" style="display:inline-block;background:#FF5500;color:#ffffff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
+                Bekijk je volledige rapport &rarr;
+            </a>
+            <div style="font-size:12px;color:#94a3b8;margin-top:12px;">
+                Score breakdown, herschreven teksten, SEO keywords en actieplan
+            </div>
+        </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+        <td style="background:#f8f7fa;padding:24px 40px;text-align:center;border-top:1px solid #e2e8f0;">
+            <div style="font-size:13px;color:#64748b;margin-bottom:4px;">
+                <strong style="color:#1e293b;">ProfielScore</strong> by <a href="https://recruitin.nl" style="color:#FF5500;text-decoration:none;">Recruitin</a>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;">
+                Vragen? Reply op deze email of mail <a href="mailto:wouter@recruitin.nl" style="color:#94a3b8;">wouter@recruitin.nl</a>
+            </div>
+        </td>
+    </tr>
+
+</table>
+
+</td></tr>
+</table>
+</body>
+</html>

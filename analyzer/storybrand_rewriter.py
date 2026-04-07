@@ -46,14 +46,19 @@ def generate_headlines(intake: ProfileIntake) -> list[HeadlineOption]:
         goal_suffix = f"| {location}"
         goal_cta = ""
 
-    # Eerste skill als specialisatie
-    first_skill = skills_text.split("\n")[0].strip() if skills_text else title
+    # Eerste skill als specialisatie (pak alleen de eerste, niet de hele lijst)
+    first_skill = ""
+    if skills_text:
+        parts = [s.strip() for s in skills_text.replace("\n", ",").split(",") if s.strip()]
+        first_skill = parts[0] if parts else title
+    else:
+        first_skill = title
 
     options = []
 
     # Optie 1: Direct & Probleemoplossend (Aanbevolen)
     if years_num:
-        opt1 = f"{title} | {first_skill} | {years_num}j Technisch {goal_suffix}"
+        opt1 = f"{title} | {first_skill} | {years_num}+ jaar {sector}" if sector else f"{title} | {first_skill} | {years_num}j ervaring"
     else:
         opt1 = f"{title} | {first_skill} {goal_suffix}"
     options.append(HeadlineOption(

@@ -1,9 +1,9 @@
 # ProfielScore Landing Page — Design & Architecture
 
 **Project:** LinkedIn Profile Optimizer (ProfielScore)  
-**Version:** 3.0 (HRM Pivot — Apr 2026)  
+**Version:** 4.0 (PDF Upload + Analyse Pipeline — Apr 2026)  
 **Live:** https://profielscore.nl  
-**Deployed:** Netlify (auto-deploy on push main)
+**Deployed:** Netlify (landing + functions) + Render (backend API)
 
 ---
 
@@ -243,43 +243,118 @@ LEMLIST_CAMPAIGN_ID=cam_F34D7zDwLkZhvCWQY
 ## File Structure
 
 ```
-landing-optimizer/
+linkedin-optimizer-agent/
 ├── landing/
-│   ├── index.html          ← Main landing page (1000+ lines)
-│   ├── style.css           ← Neon design system (900+ lines)
-│   ├── rapport-before.html ← Standalone rapport demo (BEFORE state)
-│   ├── rapport-after.html  ← Standalone rapport demo (AFTER state)
-│   └── rapport-dummy.html  ← Dummy rapport template
+│   ├── index.html              ← Landing page (2-step form + PDF upload)
+│   └── style.css               ← Neon design system
 ├── netlify/
 │   └── functions/
-│       └── submit.js       ← Form submission handler (to be created)
-├── CLAUDE.md               ← This file
-└── .netlify/
-    └── toml                ← Netlify configuration (if needed)
+│       └── submit.js           ← Form handler → Supabase + Resend + Render + Lemlist
+├── webhook_handler.py          ← FastAPI backend (Render), analyse + rapport email
+├── run_analysis.py             ← 8-stap analyse pipeline orchestrator
+├── models.py                   ← Pydantic modellen (ProfileIntake, ProfileAnalysis, etc.)
+├── analyzer/
+│   ├── profile_scorer.py       ← Score engine (10 categorieën, 0-100)
+│   ├── storybrand_rewriter.py  ← Headline + About + Experience rewriter (Claude)
+│   ├── seo_analyzer.py         ← SEO keywords per sector
+│   └── pdf_parser.py           ← LinkedIn PDF parser (pdfplumber, 2-kolom)
+├── generator/
+│   ├── report_builder.py       ← HTML rapport generator
+│   ├── mockup_builder.py       ← LinkedIn mockup HTML (Jinja2)
+│   ├── banner_generator.py     ← LinkedIn banner PNG (Pillow)
+│   └── templates/
+│       └── linkedin_mockup.html ← Jinja2 mockup template
+├── db/
+│   ├── supabase_client.py      ← Supabase CRUD
+│   ├── lemlist_client.py       ← Lemlist campaign API
+│   ├── pipedrive_client.py     ← Pipedrive CRM
+│   └── clay_client.py          ← Clay enrichment
+├── requirements.txt
+├── render.yaml                 ← Render deploy config
+└── CLAUDE.md
 ```
 
 ---
 
-## Next Steps (Backlog)
+## Backend Analyse Pipeline (v4.0 — Apr 7, 2026)
 
-- [x] **Netlify Function:** `netlify/functions/submit.js` — form → Supabase + Lemlist ✅
-- [x] **Supabase Integration:** `profielscore_leads` table with RLS INSERT policy ✅
-  - Columns: email, linkedin_url, voornaam, achternaam, telefoonnummer, bedrijfsnaam, status, source, created_at
-- [x] **Netlify Env Vars:** SUPABASE_URL, SUPABASE_ANON_KEY, LEMLIST_API_KEY, LEMLIST_CAMPAIGN_ID ✅
-- [x] **HRM Pivot:** All copy updated from candidate → HRM/recruitment manager targeting ✅
-- [x] **Hero Cleanup:** Disclaimer removed, score card removed, minimal hero ✅
+### Flow
+```
+profielscore.nl form submit (LinkedIn URL + email + PDF upload)
+  ↓
+Netlify function (submit.js)
+  ├── Validate + INSERT → Supabase profielscore_leads
+  ├── Resend → bevestigingsmail
+  ├── Fire-and-forget → Render /profielscore-submit
+  └── Lemlist → lead toevoegen
+  ↓
+Render backend (webhook_handler.py)
+  ├── Parse LinkedIn PDF (pdfplumber, 2-kolom layout)
+  ├── Auto-detect sector/goal/audience from profile text
+  ├── Build ProfileIntake (PDF data > form data > defaults)
+  ├── Run 8-stap analyse pipeline
+  │   ├── Score (10 categorieën, 0-100)
+  │   ├── 3 headline opties (Direct/Resultaat/Autoriteit)
+  │   ├── StoryBrand about rewrite (SB7 framework)
+  │   ├── SEO keywords (sector-specifiek)
+  │   ├── Experience rewrite
+  │   └── Banner + Mockup generatie
+  ├── Update Supabase status → "completed"
+  └── Send rapport email via Resend
+```
 
-- [ ] **Lemlist Email Sequence:** Configure 4-email sequence in Lemlist UI
-  - Campaign: `cam_F34D7zDwLkZhvCWQY`
-  - Sequence: Day 0 confirmation, Day 3 value, Day 7 CTA, Day 14 breakup
+### PDF Upload Feature
+- Users upload LinkedIn "Save as PDF" export (verplicht)
+- Client: FileReader → base64 → JSON POST to Netlify → forward to Render
+- Parser: pdfplumber word-level extraction, x-position column separation (35% boundary)
+  - Left column (sidebar): Contact, Top Skills, Languages
+  - Right column (main): Name, Headline, Summary, Experience, Education
+- Auto-detection: sector (8 sectors), goal (owner/seeker/branding), audience
 
-- [ ] **PDF Rapport Generation:** Make.com/Zapier trigger → generate PDF → email
+### Scoring (neutral for PDF-undetectable fields)
+- Photo/Banner: 5/10 neutral (not detectable from PDF)
+- Sector/Goal/Audience: auto-detected from profile text
+- 10 categories total, weighted score 0-100
 
-- [ ] **Lead Scoring:** LinkedIn profiel analyse → ICP score in Supabase
+### Environment Variables (Render)
+```
+ANTHROPIC_API_KEY, RESEND_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY
+```
 
-- [ ] **A/B Testing:** Test HRM hook variations, CTA colors
+### Environment Variables (Netlify)
+```
+SUPABASE_URL, SUPABASE_ANON_KEY, LEMLIST_API_KEY, LEMLIST_CAMPAIGN_ID
+RESEND_API_KEY
+```
 
-- [ ] **Analytics Dashboard:** GA4 + Data Studio funnel metrics
+---
+
+## Status & Backlog
+
+### Done (apr 7, 2026)
+- [x] HRM pivot, 2-step form, neon design, blob animation
+- [x] Netlify function → Supabase + Lemlist + Resend + Render
+- [x] PDF upload feature (verplicht, drag & drop)
+- [x] LinkedIn PDF parser (2-kolom, pdfplumber)
+- [x] Auto-detect sector/goal/audience from profile text
+- [x] Scoring engine neutral for undetectable fields
+- [x] Rapport email with score breakdown, headlines, about, SEO, actieplan
+- [x] Markdown → HTML in about text (`**bold**` → `<strong>`)
+- [x] Banner removed from rapport (upsell in follow-up)
+- [x] Banner removed from actieplan
+- [x] Headline fix: first skill only, format `{years}+ jaar {sector}`
+- [x] GA4, Meta Pixel, LinkedIn Insight Tag tracking
+
+### In Progress
+- [ ] **Professioneel Rapport v2** — Hosted HTML rapport op Supabase Storage + premium email summary
+- [ ] **LinkedIn Mockup PNG** — Pillow-based mockup image (Figma template → Pillow composite)
+- [ ] **Supabase Storage** — Persistent opslag voor rapport, mockup, banner
+
+### TODO
+- [ ] Lemlist email sequence (cam_F34D7zDwLkZhvCWQY, 4 emails dag 0/3/7/14)
+- [ ] Pipedrive deal bij gekwalificeerde leads (score ≥ 50)
+- [ ] A/B Testing: HRM hook variations
+- [ ] Analytics Dashboard: GA4 funnel metrics
 
 ---
 
@@ -326,7 +401,4 @@ This reframe increases perceived value by 20-30% (based on copywriting research)
 | 1.0 | Mar 2026 | Initial minimal design |
 | 2.0 | Apr 2026 | Funnel redesign: blob, 2-step form, stats strip, outcome-focused copy |
 | 3.0 | Apr 2026 | HRM pivot: all copy → techtalent/HRM, doel→bedrijfsnaam, Netlify+Supabase+Lemlist live, hero cleanup |
-
----
-
-**Questions?** Check the git history or reach out.
+| 4.0 | Apr 7, 2026 | PDF upload (verplicht), LinkedIn PDF parser, auto-detect sector/goal/audience, scoring neutral for undetectable fields, rapport fixes (markdown, banner, headline) |
