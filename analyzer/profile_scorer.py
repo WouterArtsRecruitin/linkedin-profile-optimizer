@@ -401,8 +401,9 @@ def _score_photo(intake: ProfileIntake) -> tuple:
     if intake.profile_photo_url:
         return 8, "Profielfoto aanwezig.", ["Controleer of de foto professioneel, scherp en goed uitgelicht is"]
     else:
-        return 2, "Geen profielfoto geüpload.", [
-            "Upload een professionele foto: gezicht duidelijk zichtbaar, neutrale achtergrond, zakelijk maar toegankelijk"
+        # PDF uploads bevatten geen foto-info — geef neutrale score, niet penaliseren
+        return 5, "Profielfoto niet te beoordelen vanuit PDF.", [
+            "Zorg voor een professionele foto: gezicht duidelijk zichtbaar, neutrale achtergrond"
         ]
 
 
@@ -414,8 +415,9 @@ def _score_banner(intake: ProfileIntake) -> tuple:
             "We genereren een nieuwe, professionele banner op basis van je sector en branding"
         ]
     else:
-        return 1, "Je gebruikt de standaard LinkedIn achtergrond.", [
-            "Een custom banner vergroot je professionele uitstraling enorm — we maken er een voor je!"
+        # PDF uploads bevatten geen banner-info — geef neutrale score
+        return 5, "Banner niet te beoordelen vanuit PDF.", [
+            "Een custom banner vergroot je professionele uitstraling — we maken er een voor je!"
         ]
 
 
@@ -535,8 +537,9 @@ def _score_audience_fit(intake: ProfileIntake) -> tuple:
     suggestions = []
 
     if not intake.target_audience.strip():
-        return 2, "Geen doelgroep opgegeven.", [
-            "Definieer wie je wilt bereiken: recruiters, HR managers, technisch directeuren, etc."
+        # Geen doelgroep bekend — geef neutrale score (niet hard penaliseren bij PDF)
+        return 5, "Doelgroep automatisch bepaald.", [
+            "Tip: definieer specifiek wie je wilt bereiken voor betere positionering"
         ]
 
     # Check of headline past bij doel

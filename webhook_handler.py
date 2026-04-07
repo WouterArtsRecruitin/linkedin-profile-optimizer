@@ -609,13 +609,23 @@ async def profielscore_submit(request: Request):
         if linkedin_pdf_base64:
             try:
                 import base64
-                from analyzer.pdf_parser import parse_linkedin_pdf, pdf_data_to_intake_fields
+                from analyzer.pdf_parser import (parse_linkedin_pdf, pdf_data_to_intake_fields,
+                    detect_sector_from_profile, detect_goal_from_profile, detect_audience_from_profile)
                 pdf_bytes = base64.b64decode(linkedin_pdf_base64)
                 print(f"   📄 LinkedIn PDF ontvangen ({len(pdf_bytes) // 1024} KB), parsing...")
                 pdf_data = parse_linkedin_pdf(pdf_bytes)
                 pdf_fields = pdf_data_to_intake_fields(pdf_data)
+                # Auto-detect sector, goal, audience from profile content
+                detected_sector = detect_sector_from_profile(pdf_data)
+                detected_goal = detect_goal_from_profile(pdf_data)
+                detected_audience = detect_audience_from_profile(pdf_data, detected_sector)
+                pdf_fields["target_sector"] = detected_sector
+                pdf_fields["linkedin_goal"] = detected_goal
+                pdf_fields["target_audience"] = detected_audience
+                pdf_fields["top_3_skills"] = ", ".join(pdf_data.skills[:5]) if pdf_data.skills else ""
                 print(f"   ✅ PDF parsed: {pdf_data.full_name} — {pdf_data.headline}")
                 print(f"      Skills: {len(pdf_data.skills)}, Experience: {len(pdf_data.experiences)}, Education: {len(pdf_data.education)}")
+                print(f"      Sector: {detected_sector}, Goal: {detected_goal}")
             except Exception as e:
                 print(f"   ⚠️ PDF parsing mislukt: {e} — doorgaan met form data")
 
@@ -646,10 +656,10 @@ async def profielscore_submit(request: Request):
             years_experience=pdf_fields.get("years_experience") or data.get("years_experience", ""),
             current_job_description=pdf_fields.get("current_job_description") or data.get("current_job_description", ""),
             previous_experience=pdf_fields.get("previous_experience") or data.get("previous_experience", ""),
-            linkedin_goal=data.get("linkedin_goal", "Meer zichtbaarheid en kansen"),
-            target_sector=data.get("target_sector", ""),
-            target_audience=data.get("target_audience", ""),
-            top_3_skills=data.get("top_3_skills", ""),
+            linkedin_goal=pdf_fields.get("linkedin_goal") or data.get("linkedin_goal", "Mijn personal brand versterken"),
+            target_sector=pdf_fields.get("target_sector") or data.get("target_sector", ""),
+            target_audience=pdf_fields.get("target_audience") or data.get("target_audience", ""),
+            top_3_skills=pdf_fields.get("top_3_skills") or data.get("top_3_skills", ""),
             unique_value=data.get("unique_value", ""),
             education=pdf_fields.get("education") or data.get("education", ""),
             certificates=pdf_fields.get("certificates") or data.get("certificates", ""),
@@ -667,76 +677,129 @@ async def profielscore_submit(request: Request):
 
         print(f"   ✅ Analyse klaar: {score}/100 (Grade {grade})")
 
-        # P5: Upload banner naar Supabase Storage (persistent URL)
-        banner_url = ""
-        if analysis.banner_png_path:
-            banner_url = upload_to_supabase_storage(analysis.banner_png_path)
-
         # Stuur rapport email via Resend
         resend_api_key = os.environ.get("RESEND_API_KEY", "")
         if not resend_api_key:
             print("   ❌ RESEND_API_KEY niet geconfigureerd — rapport email overgeslagen")
             return JSONResponse(content={"status": "error", "message": "RESEND_API_KEY not configured"}, status_code=500)
 
-        score_color = "#16a34a" if score >= 70 else "#d97706" if score >= 50 else "#dc2626"
-        score_label = "Goed" if score >= 70 else "Verbetering mogelijk" if score >= 50 else "Verbetering nodig"
+        score_color = "#16a34a" if score >= 70 else "#f59e0b" if score >= 50 else "#ef4444"
+        score_label = "Sterk profiel" if score >= 70 else "Ruimte voor groei" if score >= 50 else "Veel potentieel"
 
-        headline_html = "".join([
-            f'<div style="background:#f7f3ff;border-left:4px solid #7c3aed;padding:14px 16px;border-radius:0 8px 8px 0;margin-bottom:10px;">'
-            f'<p style="margin:0 0 4px;font-size:11px;color:#7c3aed;font-weight:bold;text-transform:uppercase;">{h.style}</p>'
-            f'<p style="margin:0;color:#1a1a2e;font-size:14px;">{h.text}</p></div>'
-            for h in analysis.headline_options[:3]
-        ])
+        # Score breakdown per categorie
+        breakdown_html = ""
+        for cat in analysis.score.categories:
+            pct = int((cat.score / cat.max_score) * 100)
+            bar_color = "#16a34a" if pct >= 70 else "#f59e0b" if pct >= 50 else "#ef4444"
+            breakdown_html += (
+                f'<tr>'
+                f'<td style="padding:8px 0;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">{cat.name}</td>'
+                f'<td style="padding:8px 0;border-bottom:1px solid #f3f4f6;width:50%;">'
+                f'<div style="background:#f3f4f6;border-radius:4px;height:8px;overflow:hidden;">'
+                f'<div style="background:{bar_color};height:8px;width:{pct}%;border-radius:4px;"></div></div></td>'
+                f'<td style="padding:8px 0 8px 12px;font-size:13px;font-weight:600;color:{bar_color};border-bottom:1px solid #f3f4f6;text-align:right;">{cat.score}/{cat.max_score}</td>'
+                f'</tr>'
+            )
 
+        # Headline opties
+        headline_html = ""
+        for i, h in enumerate(analysis.headline_options[:3]):
+            badge = '<span style="display:inline-block;background:#16a34a;color:#fff;font-size:10px;padding:2px 8px;border-radius:3px;margin-left:8px;vertical-align:middle;">AANBEVOLEN</span>' if i == 0 else ''
+            headline_html += (
+                f'<div style="background:#f8fafc;border:1px solid #e2e8f0;padding:16px;border-radius:8px;margin-bottom:10px;">'
+                f'<p style="margin:0 0 6px;font-size:11px;color:#6366f1;font-weight:700;text-transform:uppercase;">{h.style}{badge}</p>'
+                f'<p style="margin:0;color:#1e293b;font-size:15px;font-weight:500;">{h.text}</p></div>'
+            )
+
+        # Herschreven Over Mij sectie
+        about_html = ""
+        if analysis.improved_about and analysis.improved_about.text:
+            about_text = analysis.improved_about.text.replace("\n", "<br>")
+            about_html = f"""
+            <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
+              <h3 style="color:#1e293b;margin:0 0 8px;font-size:18px;">Herschreven 'Over Mij'</h3>
+              <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Kopieer deze tekst naar je LinkedIn profiel:</p>
+              <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:20px;border-radius:8px;font-size:14px;color:#1e293b;line-height:1.7;">{about_text}</div>
+            </div>"""
+
+        # SEO keywords
         keywords_html = "".join([
-            f'<span style="display:inline-block;background:#ede9fe;color:#6d28d9;padding:6px 12px;border-radius:20px;font-size:13px;margin:4px;">{k.keyword}</span>'
+            f'<span style="display:inline-block;background:#eef2ff;color:#4338ca;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;margin:3px;">{k.keyword}</span>'
             for k in analysis.seo_keywords[:8]
         ])
 
-        action_html = "".join([
-            f'<div style="display:flex;align-items:flex-start;margin-bottom:12px;">'
-            f'<span style="background:#7c3aed;color:#fff;border-radius:50%;min-width:24px;height:24px;line-height:24px;text-align:center;font-size:12px;font-weight:bold;margin-right:12px;">{i+1}</span>'
-            f'<p style="margin:0;color:#374151;font-size:14px;line-height:1.5;padding-top:4px;">{item}</p></div>'
-            for i, item in enumerate(analysis.action_items[:6])
-        ])
+        # Actieplan
+        action_html = ""
+        for i, item in enumerate(analysis.action_items[:5]):
+            action_html += (
+                f'<div style="display:flex;align-items:flex-start;margin-bottom:14px;">'
+                f'<div style="background:#6366f1;color:#fff;border-radius:50%;min-width:28px;height:28px;line-height:28px;text-align:center;font-size:13px;font-weight:700;margin-right:14px;flex-shrink:0;">{i+1}</div>'
+                f'<p style="margin:0;color:#374151;font-size:14px;line-height:1.6;padding-top:4px;">{item}</p></div>'
+            )
 
         html_body = f"""
-        <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;color:#1a1a2e;">
-          <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);padding:48px 40px;text-align:center;">
-            <h1 style="color:#fff;margin:0 0 8px;font-size:32px;letter-spacing:-1px;">ProfielScore</h1>
-            <p style="color:#a78bfa;margin:0;font-size:15px;">LinkedIn Profiel Analyse Rapport</p>
+        <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;color:#1e293b;background:#ffffff;">
+          <!-- Header -->
+          <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:40px;text-align:center;">
+            <h1 style="color:#fff;margin:0 0 4px;font-size:24px;font-weight:300;letter-spacing:2px;">PROFIELSCORE</h1>
+            <p style="color:#94a3b8;margin:0;font-size:13px;">LinkedIn Profiel Analyse</p>
           </div>
-          <div style="padding:40px;text-align:center;border-bottom:1px solid #f0f0f0;">
-            <div style="display:inline-block;background:{score_color};border-radius:50%;width:100px;height:100px;line-height:100px;margin:0 auto;">
-              <span style="color:#fff;font-size:42px;font-weight:bold;">{score}</span>
+
+          <!-- Score -->
+          <div style="padding:40px;text-align:center;border-bottom:1px solid #f1f5f9;">
+            <div style="display:inline-block;width:120px;height:120px;border-radius:50%;border:4px solid {score_color};line-height:120px;margin:0 auto;">
+              <span style="color:{score_color};font-size:48px;font-weight:700;">{score}</span>
             </div>
-            <p style="color:#6b7280;margin:8px 0 0;font-size:14px;">van de 100 punten</p>
-            <p style="color:{score_color};font-size:18px;font-weight:bold;margin:8px 0 0;">{score_label} — Grade {grade}</p>
-            <h2 style="color:#1a1a2e;margin:24px 0 8px;">Hoi {first},</h2>
-            <p style="color:#4a5568;line-height:1.7;max-width:480px;margin:0 auto;">
-              Je ProfielScore is <strong>{score}/100</strong>. Hieronder vind je je persoonlijke analyse met concrete verbeterpunten.
+            <p style="color:#64748b;margin:10px 0 0;font-size:13px;">van de 100 punten</p>
+            <p style="color:{score_color};font-size:16px;font-weight:600;margin:6px 0 0;">{score_label}</p>
+          </div>
+
+          <!-- Intro -->
+          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
+            <p style="color:#374151;line-height:1.7;margin:0;font-size:15px;">
+              Hoi {first}, hieronder vind je jouw persoonlijke LinkedIn analyse met concrete verbeterpunten die je direct kunt toepassen.
             </p>
           </div>
-          <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
-            <h3 style="color:#1a1a2e;margin:0 0 20px;">🎯 Aanbevolen Headline Opties</h3>
+
+          <!-- Score Breakdown -->
+          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
+            <h3 style="color:#1e293b;margin:0 0 16px;font-size:16px;">Score per categorie</h3>
+            <table style="width:100%;border-collapse:collapse;">{breakdown_html}</table>
+          </div>
+
+          <!-- Headlines -->
+          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
+            <h3 style="color:#1e293b;margin:0 0 16px;font-size:16px;">Nieuwe headline opties</h3>
+            <p style="color:#64748b;font-size:13px;margin:0 0 14px;">Huidige: <em style="color:#94a3b8;">{intake.current_headline[:80]}...</em></p>
             {headline_html}
           </div>
-          <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
-            <h3 style="color:#1a1a2e;margin:0 0 16px;">🔍 Ontbrekende SEO Keywords</h3>
-            <p style="color:#4a5568;font-size:14px;margin:0 0 16px;">Voeg deze keywords toe voor betere vindbaarheid:</p>
+
+          <!-- About rewrite -->
+          {about_html}
+
+          <!-- SEO Keywords -->
+          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
+            <h3 style="color:#1e293b;margin:0 0 8px;font-size:16px;">Ontbrekende SEO keywords</h3>
+            <p style="color:#64748b;font-size:13px;margin:0 0 14px;">Verwerk deze in je headline, about en ervaring:</p>
             <div>{keywords_html}</div>
           </div>
-          <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
-            <h3 style="color:#1a1a2e;margin:0 0 20px;">✅ Jouw Actieplan</h3>
+
+          <!-- Actieplan -->
+          <div style="padding:28px 40px;border-bottom:1px solid #f1f5f9;">
+            <h3 style="color:#1e293b;margin:0 0 16px;font-size:16px;">Jouw actieplan</h3>
             {action_html}
           </div>
-          {'<div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;text-align:center;"><h3 style="color:#1a1a2e;margin:0 0 16px;">🎨 Jouw LinkedIn Banner</h3><p style="color:#4a5568;font-size:14px;margin:0 0 16px;">Klik om te downloaden en upload naar LinkedIn (Profiel → Achtergrond bewerken):</p><a href="' + banner_url + '" target="_blank"><img src="' + banner_url + '" style="width:100%;max-width:560px;border-radius:8px;border:1px solid #e5e7eb;" alt="LinkedIn Banner"/></a></div>' if banner_url else ''}
-          <div style="padding:40px;text-align:center;background:#fafafa;">
-            <p style="color:#4a5568;margin:0 0 24px;">Vragen of hulp bij implementatie?</p>
-            <a href="mailto:wouter.arts@recruitin.nl" style="display:inline-block;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;">Neem contact op</a>
+
+          <!-- CTA -->
+          <div style="padding:36px 40px;text-align:center;background:#f8fafc;">
+            <p style="color:#374151;margin:0 0 6px;font-size:15px;font-weight:600;">Hulp nodig bij de implementatie?</p>
+            <p style="color:#64748b;margin:0 0 20px;font-size:13px;">We helpen je profiel optimaliseren zodat techtalent jou vindt.</p>
+            <a href="mailto:wouter.arts@recruitin.nl" style="display:inline-block;background:#6366f1;color:#fff;padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;">Plan een gesprek</a>
           </div>
-          <div style="background:#1a1a2e;padding:24px;text-align:center;">
-            <p style="color:#6b7280;font-size:12px;margin:0;">profielscore.nl — een dienst van Recruitin B.V. | Doesburg</p>
+
+          <!-- Footer -->
+          <div style="padding:20px 40px;text-align:center;">
+            <p style="color:#94a3b8;font-size:11px;margin:0;">profielscore.nl — Recruitin B.V. | Doesburg</p>
           </div>
         </div>
         """

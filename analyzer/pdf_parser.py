@@ -418,6 +418,78 @@ def pdf_data_to_intake_fields(pdf_data: LinkedInPDFData) -> dict:
     }
 
 
+def detect_sector_from_profile(pdf_data: LinkedInPDFData) -> str:
+    """Auto-detect target sector from profile text (headline + about + experience)."""
+    all_text = " ".join([
+        pdf_data.headline,
+        pdf_data.about,
+        " ".join(s for s in pdf_data.skills),
+        " ".join(exp.get("title", "") + " " + exp.get("company", "") + " " + exp.get("description", "")
+                 for exp in pdf_data.experiences[:3])
+    ]).lower()
+
+    sector_signals = {
+        "HR & Recruitment": ["recruit", "hr ", "human resource", "talent", "werving", "selectie",
+                              "sourcing", "employer brand", "rpo", "staffing", "uitzend"],
+        "IT & Software": ["software", "developer", "programmeur", "devops", "cloud", "saas",
+                           "data engineer", "frontend", "backend", "full stack", "agile", "scrum"],
+        "Bouw & Constructie": ["bouw", "constructie", "aannemer", "uitvoerder", "werkvoorbereider",
+                                "civiel", "infra", "wegen", "heijmans", "bam", "volker"],
+        "Techniek & Productie": ["technisch", "productie", "manufacturing", "cnc", "engineer",
+                                  "onderhoud", "mechatronica", "elektro", "installatie"],
+        "Olie & Gas": ["oil", "gas", "offshore", "petrochemie", "refinery", "pipeline"],
+        "Overheid & Publiek": ["gemeente", "overheid", "toezicht", "vergunning", "handhaving",
+                                "rijkswaterstaat", "provincie"],
+        "Finance & Consulting": ["finance", "consulting", "advisory", "accountant", "audit",
+                                  "controller", "cfo", "financieel"],
+        "Sales & Marketing": ["sales", "marketing", "business development", "account manager",
+                               "commercieel", "acquisitie"],
+    }
+
+    best_sector = ""
+    best_count = 0
+    for sector, keywords in sector_signals.items():
+        count = sum(1 for kw in keywords if kw in all_text)
+        if count > best_count:
+            best_count = count
+            best_sector = sector
+
+    return best_sector or "Overig"
+
+
+def detect_goal_from_profile(pdf_data: LinkedInPDFData) -> str:
+    """Auto-detect linkedin goal from profile context."""
+    headline = pdf_data.headline.lower()
+    about = pdf_data.about.lower()
+
+    # Business owner signals
+    owner_signals = ["directeur", "eigenaar", "founder", "oprichter", "ceo", "managing",
+                      "ondernemer", "zelfstandig", "freelance", "zzp"]
+    if any(s in headline for s in owner_signals):
+        return "Meer klanten / opdrachten krijgen"
+
+    # Job seeker signals
+    seeker_signals = ["open voor", "beschikbaar", "zoek", "looking for", "seeking"]
+    if any(s in headline or s in about for s in seeker_signals):
+        return "Een nieuwe baan vinden"
+
+    return "Mijn personal brand versterken"
+
+
+def detect_audience_from_profile(pdf_data: LinkedInPDFData, sector: str) -> str:
+    """Auto-detect target audience based on sector and role."""
+    headline = pdf_data.headline.lower()
+
+    if "recruit" in headline or "hr" in headline:
+        return "Technisch directeuren, HR managers en operationeel leidinggevenden bij technische MKB bedrijven (50-800 medewerkers)"
+    elif "directeur" in headline or "eigenaar" in headline:
+        return "Potentiële klanten, partners en talent in de sector"
+    elif "sales" in headline or "commerci" in headline:
+        return "Decision makers en inkopers bij doelbedrijven"
+    else:
+        return f"Recruiters, hiring managers en professionals in {sector}"
+
+
 def _estimate_years_experience(experiences: list) -> str:
     """Estimate total years from experience date ranges."""
     if not experiences:
