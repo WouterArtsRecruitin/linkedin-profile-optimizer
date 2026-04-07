@@ -48,7 +48,7 @@ def upload_bytes(
         storage_path = f"{date_prefix}/{safe}/{filename}"
 
         client.storage.from_(bucket).upload(
-            storage_path, data, {"content-type": content_type}
+            storage_path, data, {"content-type": content_type, "upsert": "true"}
         )
 
         public_url = client.storage.from_(bucket).get_public_url(storage_path)
