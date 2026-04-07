@@ -713,8 +713,8 @@ async def profielscore_submit(request: Request):
 
         # Herschreven Over Mij sectie
         about_html = ""
-        if analysis.improved_about and analysis.improved_about.text:
-            about_text = analysis.improved_about.text.replace("\n", "<br>")
+        if analysis.improved_about and analysis.improved_about.full_text:
+            about_text = analysis.improved_about.full_text.replace("\n", "<br>")
             about_html = f"""
             <div style="padding:32px 40px;border-bottom:1px solid #f0f0f0;">
               <h3 style="color:#1e293b;margin:0 0 8px;font-size:18px;">Herschreven 'Over Mij'</h3>
