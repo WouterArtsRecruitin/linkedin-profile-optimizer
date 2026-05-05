@@ -249,7 +249,8 @@ linkedin-optimizer-agent/
 │   └── style.css               ← Neon design system
 ├── netlify/
 │   └── functions/
-│       └── submit.js           ← Form handler → Supabase + Resend + Render + Lemlist
+│       ├── submit.js           ← Form handler → Supabase + Resend + Render + Lemlist
+│       └── rapport.js          ← Proxy: fetch rapport HTML uit Supabase Storage, serve als text/html
 ├── webhook_handler.py          ← FastAPI backend (Render), analyse + rapport email
 ├── run_analysis.py             ← 8-stap analyse pipeline orchestrator
 ├── models.py                   ← Pydantic modellen (ProfileIntake, ProfileAnalysis, etc.)
@@ -259,11 +260,16 @@ linkedin-optimizer-agent/
 │   ├── seo_analyzer.py         ← SEO keywords per sector
 │   └── pdf_parser.py           ← LinkedIn PDF parser (pdfplumber, 2-kolom)
 ├── generator/
-│   ├── report_builder.py       ← HTML rapport generator
+│   ├── report_builder.py       ← Hosted rapport + email summary builder (Jinja2)
 │   ├── mockup_builder.py       ← LinkedIn mockup HTML (Jinja2)
+│   ├── mockup_image_builder.py ← LinkedIn mockup PNG (Pillow, 1200×800)
 │   ├── banner_generator.py     ← LinkedIn banner PNG (Pillow)
+│   ├── storage_uploader.py     ← Supabase Storage upload (rapport, mockup, banner)
 │   └── templates/
-│       └── linkedin_mockup.html ← Jinja2 mockup template
+│       ├── linkedin_mockup.html  ← Jinja2 mockup template
+│       ├── hosted_rapport.html   ← Jinja2 hosted rapport (dark ProfielScore brand)
+│       ├── email_rapport.html    ← Jinja2 email summary (table-based, CTA)
+│       └── fonts/                ← Gebundelde Inter fonts (Regular, SemiBold, Bold)
 ├── db/
 │   ├── supabase_client.py      ← Supabase CRUD
 │   ├── lemlist_client.py       ← Lemlist campaign API
@@ -299,8 +305,11 @@ Render backend (webhook_handler.py)
   │   ├── SEO keywords (sector-specifiek)
   │   ├── Experience rewrite
   │   └── Banner + Mockup generatie
-  ├── Update Supabase status → "completed"
-  └── Send rapport email via Resend
+  ├── Generate mockup PNG (Pillow, 1200×800)
+  ├── Upload → Supabase Storage (rapport.html, mockup.png, banner.png)
+  ├── Build email summary (Jinja2, CTA → Netlify proxy → hosted rapport)
+  ├── Send email via Resend
+  └── Update Supabase (status=completed, score, grade, rapport_url, mockup_url)
 ```
 
 ### PDF Upload Feature
@@ -345,12 +354,39 @@ RESEND_API_KEY
 - [x] Headline fix: first skill only, format `{years}+ jaar {sector}`
 - [x] GA4, Meta Pixel, LinkedIn Insight Tag tracking
 
-### In Progress
-- [ ] **Professioneel Rapport v2** — Hosted HTML rapport op Supabase Storage + premium email summary
-- [ ] **LinkedIn Mockup PNG** — Pillow-based mockup image (Figma template → Pillow composite)
-- [ ] **Supabase Storage** — Persistent opslag voor rapport, mockup, banner
+### Done (apr 7, 2026 — rapport v2)
+- [x] Hosted rapport op Supabase Storage (dark ProfielScore brand, Jinja2)
+- [x] Premium email summary met CTA → hosted rapport
+- [x] LinkedIn mockup PNG (Pillow, 1200×800, Inter fonts)
+- [x] Supabase Storage uploads (rapport, mockup, banner) met upsert
+- [x] Netlify proxy function (rapport.js) — Supabase serveert HTML als text/plain
+- [x] Supabase schema: rapport_url, mockup_url, banner_url, score, grade kolommen
+- [x] Score + grade opgeslagen in Supabase bij completion
+
+### Rapport Architectuur
+```
+Email (compact summary)                    Hosted rapport (volledig)
+├── Score cirkel + grade                   ├── Score breakdown (alle categorieën)
+├── Top 3 categorieën                      ├── 3 headline opties + AANBEVOLEN badge
+├── Aanbevolen headline                    ├── Herschreven About (copy-to-clipboard)
+├── Mockup preview                         ├── SEO keyword pills
+├── CTA → "Bekijk rapport"                 ├── Experience voor/na vergelijking
+└── Recruitin footer                       ├── Actieplan (genummerd)
+                                           ├── LinkedIn mockup image
+                                           └── Print-to-PDF via window.print()
+```
+
+**Rapport URL flow:** Email CTA → Netlify `/.netlify/functions/rapport?path=...` → fetch van Supabase Storage → serve als `text/html`
+
+### Done (apr 7, 2026 — Figma designs)
+- [x] Figma file geüpdatet met 8 pages (file: `5mWJIMDO3NQwfN2wls8LoS`)
+  - **ProfielScore** (4 pages): Landing Page, Hosted Rapport, LinkedIn Mockup, Email Template
+  - **Kandidatentekort** (2 pages): Vacature Analyse Rapport, Email Template
+  - **Recruitment APK** (2 pages): Audit Rapport, Email Template
+- [x] Elk product heeft unieke brand, content en secties (niet copy-paste)
 
 ### TODO
+- [ ] Gegenereerde teksten fixen — storybrand_rewriter.py gebruikt GEEN AI, alles is f-string templates
 - [ ] Lemlist email sequence (cam_F34D7zDwLkZhvCWQY, 4 emails dag 0/3/7/14)
 - [ ] Pipedrive deal bij gekwalificeerde leads (score ≥ 50)
 - [ ] A/B Testing: HRM hook variations
@@ -401,4 +437,120 @@ This reframe increases perceived value by 20-30% (based on copywriting research)
 | 1.0 | Mar 2026 | Initial minimal design |
 | 2.0 | Apr 2026 | Funnel redesign: blob, 2-step form, stats strip, outcome-focused copy |
 | 3.0 | Apr 2026 | HRM pivot: all copy → techtalent/HRM, doel→bedrijfsnaam, Netlify+Supabase+Lemlist live, hero cleanup |
-| 4.0 | Apr 7, 2026 | PDF upload (verplicht), LinkedIn PDF parser, auto-detect sector/goal/audience, scoring neutral for undetectable fields, rapport fixes (markdown, banner, headline) |
+| 4.0 | Apr 7, 2026 | PDF upload, LinkedIn PDF parser, auto-detect sector/goal/audience, scoring neutral for undetectable fields |
+| 5.0 | Apr 7, 2026 | Professioneel rapport: hosted rapport (Supabase Storage + Netlify proxy), email summary, LinkedIn mockup PNG (Pillow), storage uploads, Supabase schema update |
+| 5.1 | Apr 7, 2026 | Figma designs: 8 pages — ProfielScore (4), Kandidatentekort (2), Recruitment APK (2) in file 5mWJIMDO3NQwfN2wls8LoS |
+
+---
+
+## Figma Design Reference
+
+**Figma file:** `5mWJIMDO3NQwfN2wls8LoS`
+**URL:** https://www.figma.com/design/5mWJIMDO3NQwfN2wls8LoS/
+
+| Page | Node ID | Inhoud |
+|------|---------|--------|
+| Page | Node ID | Product | Inhoud |
+|------|---------|---------|--------|
+| Landing Page | `0:1` | ProfielScore | Live profielscore.nl capture (1890×3929) |
+| Hosted Rapport | `19:2` | ProfielScore | Score hero, 10 category bars, 3 headlines, about, SEO pills, actieplan, mockup, CTA |
+| LinkedIn Mockup | `19:3` | ProfielScore | LinkedIn-style profielkaart (1200×800), score overlay, voor/na, VERBETERD badges |
+| Email Template | `19:4` | ProfielScore | 600px email: score cirkel, top 3, verbeterpunten, headline, CTA |
+| KT — Vacature Rapport | `28:2` | Kandidatentekort | Vacature score, 8 categorieën, marktanalyse, salaris benchmark, herschreven tekst, kanaaladvies |
+| KT — Email Template | `28:3` | Kandidatentekort | Score, bevindingen (groen/oranje/rood), markt snapshot, quick wins, CTA |
+| APK — Audit Rapport | `28:4` | Recruitment APK | APK score, 8 audit categorieën, benchmark tabel, ROI berekening, 4-fasen implementatieplan, diensten |
+| APK — Email Template | `28:5` | Recruitment APK | Score, kritieke verbeterpunten, €47K besparing, quick wins, vervolggesprek CTA |
+
+### Brand Tokens per Product
+
+| Product | Stijl | Primary | Accent | Background | Text |
+|---------|-------|---------|--------|------------|------|
+| **ProfielScore** | Dark neon | `#FF5500` orange | `#ff00cc` magenta | `#07050f` dark violet | `#f2eeff` light |
+| **Kandidatentekort** | Light professional | `#2563EB` blue | `#16A34A` green | `#FAFAFC` light gray | `#111827` dark |
+| **Recruitment APK** | Corporate formal | `#1E40AF` navy blue | `#CA8A04` gold | `#F8F9FB` off-white | `#0F172A` navy |
+
+---
+
+## Cross-Product Rapport Architectuur
+
+De ProfielScore rapport-stack is herbruikbaar voor andere Recruitin producten. Hieronder de architectuur en hoe je het toepast op **kandidatentekort.nl** en **Recruitment APK**.
+
+### Gedeelde Stack (herbruikbaar)
+
+```
+Shared Components (kopieer en pas aan):
+├── generator/storage_uploader.py      → Upload naar Supabase Storage (bucket per product)
+├── generator/report_builder.py        → Jinja2 renderer (templates wisselen per product)
+├── generator/templates/*.html         → Jinja2 templates (rapport + email)
+├── netlify/functions/rapport.js       → Proxy: Supabase → text/html (1 function per product)
+└── Resend API                         → Email delivery
+```
+
+### Toepassing op Kandidatentekort.nl
+
+**Product:** Vacature-analyse rapport voor werkgevers
+**Locatie:** `/Users/wouterarts/projects/Recruitin/kandidatentekort/kandidatentekort-automation-github/`
+
+```
+Kandidatentekort Rapport Architectuur:
+├── Input: Jotform vacature intake → Claude Haiku analyse
+├── Rapport (hosted):
+│   ├── Vacature Score (0-100): vindbaarheid, aantrekkelijkheid, concurrentiekracht
+│   ├── Marktanalyse: aantal kandidaten, concurrerende vacatures, schaarste-indicator
+│   ├── Salaris benchmark: marktconform vs. aangeboden
+│   ├── Verbeterpunten: vacaturetekst, kanalen, employer branding
+│   ├── Herschreven vacaturetekst (AI-generated)
+│   └── Actieplan (genummerd)
+├── Email summary: score + top 3 verbeterpunten + CTA → hosted rapport
+├── Storage: Supabase bucket "kandidatentekort-assets"
+│   └── {YYYYMMDD}/{bedrijfsnaam}/rapport.html
+└── Proxy: kandidatentekort.nl/.netlify/functions/rapport
+```
+
+**Implementatie stappen:**
+1. Kopieer `generator/storage_uploader.py` → pas bucket aan naar `kandidatentekort-assets`
+2. Maak Jinja2 templates: `kt_hosted_rapport.html` + `kt_email_rapport.html`
+3. Gebruik kandidatentekort brand (lichtere kleuren, professionele look)
+4. Voeg `rapport.js` toe aan kandidatentekort Netlify functions
+5. Update `kandidatentekort-automation/main.py`: na Claude analyse → render rapport → upload → email
+6. Supabase: voeg `rapport_url` kolom toe aan relevante tabel
+
+### Toepassing op Recruitment APK
+
+**Product:** Recruitment proces audit rapport voor HR-afdelingen
+**Pipeline:** Pipedrive pipeline `id=2` (Recruitment APK)
+
+```
+Recruitment APK Rapport Architectuur:
+├── Input: Intake gesprek data → gestructureerde audit
+├── Rapport (hosted):
+│   ├── APK Score (0-100): proces, kanalen, employer brand, candidate experience, data
+│   ├── Benchmark: vergelijking met best practices
+│   ├── Per categorie: score + feedback + concrete verbeteringen
+│   ├── ROI berekening: kosten huidige proces vs. geoptimaliseerd
+│   ├── Implementatieplan (gefaseerd, met tijdlijn)
+│   └── Recruitin diensten die passen bij gaps
+├── Email summary: APK score + top issues + CTA → hosted rapport
+├── Storage: Supabase bucket "recruitment-apk-assets"
+│   └── {YYYYMMDD}/{bedrijfsnaam}/apk-rapport.html
+└── Proxy: aparte Netlify function of zelfde site
+```
+
+**Implementatie stappen:**
+1. Ontwerp APK-specifieke Jinja2 templates (professioneel, wit/blauw, corporate)
+2. Bouw scoring engine voor recruitment proces categorieën
+3. Kopieer storage_uploader.py → pas bucket aan
+4. Integreer met Pipedrive: deal stage → trigger rapport generatie
+5. Resend email met samenvatting + link naar volledig rapport
+
+### Template Design Principes (alle producten)
+
+| Principe | Hoe |
+|----------|-----|
+| **Two-tier delivery** | Email = compact summary + CTA → hosted = volledig rapport |
+| **Email-safe HTML** | Table-based layout, inline styles, geen CSS vars/flexbox/grid |
+| **Hosted rapport** | Standalone HTML, alle CSS inline, print-to-PDF via `window.print()` |
+| **Storage** | Supabase Storage (public bucket), Netlify proxy voor text/html |
+| **Copy-to-clipboard** | JS `navigator.clipboard.writeText()` voor teksten die gebruiker moet overnemen |
+| **Branding** | Per product eigen kleurenpalet, maar zelfde layout patronen |
+| **Scoring visual** | Conic-gradient ring (CSS) voor hoofdscore, kleur-bars voor categorieën |
